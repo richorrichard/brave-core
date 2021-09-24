@@ -8,6 +8,7 @@
 
 #include <string>
 
+#include "bat/ads/confirmation_type.h"
 #include "bat/ads/export.h"
 
 namespace base {
@@ -25,9 +26,11 @@ struct ADS_EXPORT TransactionInfo final {
   bool operator==(const TransactionInfo& rhs) const;
   bool operator!=(const TransactionInfo& rhs) const;
 
-  double timestamp = 0.0;
-  double estimated_redemption_value = 0.0;
-  std::string confirmation_type;
+  std::string id;
+  double created_at = 0.0;
+  double value = 0.0;
+  ConfirmationType confirmation_type;
+  double redeemed_at = 0.0;
 
   void ToDictionary(base::Value* dictionary) const;
 

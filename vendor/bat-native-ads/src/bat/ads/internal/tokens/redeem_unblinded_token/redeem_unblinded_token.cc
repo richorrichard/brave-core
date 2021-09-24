@@ -22,7 +22,7 @@
 #include "bat/ads/internal/logging.h"
 #include "bat/ads/internal/logging_util.h"
 #include "bat/ads/internal/privacy/challenge_bypass_ristretto_util.h"
-#include "bat/ads/internal/privacy/unblinded_tokens/unblinded_token_info.h"
+#include "bat/ads/internal/privacy/unblinded_payment_tokens/unblinded_payment_token_info.h"
 #include "bat/ads/internal/security/confirmations/confirmations_util.h"
 #include "bat/ads/internal/tokens/issuers/issuer_types.h"
 #include "bat/ads/internal/tokens/issuers/issuers_util.h"
@@ -189,7 +189,7 @@ void RedeemUnblindedToken::OnFetchPaymentToken(
 
   // Validate id
   if (*id != confirmation.id) {
-    BLOG(0, "Response id " << *id << " does not match confirmation id "
+    BLOG(0, "Response id " << *id << " does not match transaction id "
                            << confirmation.id);
     OnFailedToRedeemUnblindedToken(confirmation, /* should_retry */ false);
     return;
@@ -292,7 +292,8 @@ void RedeemUnblindedToken::OnFetchPaymentToken(
     return;
   }
 
-  privacy::UnblindedTokenInfo unblinded_payment_token;
+  privacy::UnblindedPaymentTokenInfo unblinded_payment_token;
+  unblinded_payment_token.transaction_id = confirmation.transaction_id;
   unblinded_payment_token.value = batch_dleq_proof_unblinded_tokens.front();
   unblinded_payment_token.public_key = public_key;
   unblinded_payment_token.confirmation_type = confirmation.type;
@@ -303,7 +304,7 @@ void RedeemUnblindedToken::OnFetchPaymentToken(
 
 void RedeemUnblindedToken::OnDidRedeemUnblindedToken(
     const ConfirmationInfo& confirmation,
-    const privacy::UnblindedTokenInfo& unblinded_payment_token) {
+    const privacy::UnblindedPaymentTokenInfo& unblinded_payment_token) {
   if (!delegate_) {
     return;
   }

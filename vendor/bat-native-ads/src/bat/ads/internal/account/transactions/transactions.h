@@ -6,7 +6,8 @@
 #ifndef BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_ACCOUNT_TRANSACTIONS_TRANSACTIONS_H_
 #define BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_ACCOUNT_TRANSACTIONS_TRANSACTIONS_H_
 
-#include "bat/ads/transaction_info_aliases.h"
+#include "bat/ads/internal/account/transactions/transactions_aliases.h"
+#include "bat/ads/internal/database/tables/transactions_database_table_aliases.h"
 
 namespace base {
 class Time;
@@ -14,17 +15,20 @@ class Time;
 
 namespace ads {
 
-struct ConfirmationInfo;
+class ConfirmationType;
+struct TransactionInfo;
 
 namespace transactions {
 
-TransactionList GetCleared(const base::Time& from, const base::Time& to);
-TransactionList GetUncleared();
+TransactionInfo Add(const double value,
+                    const ConfirmationType& confirmation,
+                    AddTransactionCallback callback);
 
-uint64_t GetCountForMonth(const base::Time& time);
+void GetForDateRange(const base::Time& from_time,
+                     const base::Time& to_time,
+                     GetTransactionsCallback callback);
 
-void Add(const double estimated_redemption_value,
-         const ConfirmationInfo& confirmation);
+void RemoveAll(RemoveAllTransactionsCallback callback);
 
 }  // namespace transactions
 }  // namespace ads

@@ -15,7 +15,10 @@
 namespace ads {
 namespace privacy {
 
+class UnblindedTokens;
 struct UnblindedTokenInfo;
+
+UnblindedTokens* get_unblinded_tokens();
 
 UnblindedTokenList SetUnblindedTokens(const int count);
 

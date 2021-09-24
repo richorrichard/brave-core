@@ -40,9 +40,9 @@ class BatAdsIssuersTest : public UnitTestBase {
 
 TEST_F(BatAdsIssuersTest, GetIssuers) {
   // Arrange
-  const URLEndpoints endpoints = {{// Get issuers request
-                                   R"(/v1/issuers/)",
-                                   {{net::HTTP_OK, R"(
+  const URLEndpoints& endpoints = {{// Get issuers request
+                                    R"(/v1/issuers/)",
+                                    {{net::HTTP_OK, R"(
         {
           "ping": 7200000,
           "issuers": [
@@ -88,9 +88,9 @@ TEST_F(BatAdsIssuersTest, GetIssuers) {
 
 TEST_F(BatAdsIssuersTest, GetIssuersInvalidJsonResponse) {
   // Arrange
-  const URLEndpoints endpoints = {{// Get issuers request
-                                   R"(/v1/issuers/)",
-                                   {{net::HTTP_OK, "FOOBAR"}}}};
+  const URLEndpoints& endpoints = {{// Get issuers request
+                                    R"(/v1/issuers/)",
+                                    {{net::HTTP_OK, "FOOBAR"}}}};
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
@@ -102,7 +102,7 @@ TEST_F(BatAdsIssuersTest, GetIssuersInvalidJsonResponse) {
   issuers_->MaybeFetch();
 
   // Assert
-  const IssuersInfo& expected_issuers;
+  const IssuersInfo expected_issuers;
 
   const IssuersInfo& issuers = GetIssuers();
 
@@ -111,9 +111,9 @@ TEST_F(BatAdsIssuersTest, GetIssuersInvalidJsonResponse) {
 
 TEST_F(BatAdsIssuersTest, GetIssuersNonHttpOkResponse) {
   // Arrange
-  const URLEndpoints endpoints = {{// Get issuers request
-                                   R"(/v1/issuers/)",
-                                   {{net::HTTP_NOT_FOUND, ""}}}};
+  const URLEndpoints& endpoints = {{// Get issuers request
+                                    R"(/v1/issuers/)",
+                                    {{net::HTTP_NOT_FOUND, ""}}}};
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
@@ -125,7 +125,7 @@ TEST_F(BatAdsIssuersTest, GetIssuersNonHttpOkResponse) {
   issuers_->MaybeFetch();
 
   // Assert
-  const IssuersInfo& expected_issuers;
+  const IssuersInfo expected_issuers;
 
   const IssuersInfo& issuers = GetIssuers();
 

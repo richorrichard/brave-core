@@ -8,8 +8,8 @@
 #include <memory>
 #include <utility>
 
-#include "bat/ads/internal/account/wallet/wallet.h"
 #include "bat/ads/internal/account/wallet/wallet_info.h"
+#include "bat/ads/internal/account/wallet/wallet_unittest_util.h"
 #include "bat/ads/internal/privacy/tokens/token_generator_mock.h"
 #include "bat/ads/internal/privacy/unblinded_tokens/unblinded_tokens.h"
 #include "bat/ads/internal/privacy/unblinded_tokens/unblinded_tokens_unittest_util.h"
@@ -46,18 +46,6 @@ class BatAdsRefillUnblindedTokensTest : public UnitTestBase {
   }
 
   ~BatAdsRefillUnblindedTokensTest() override = default;
-
-  privacy::UnblindedTokens* get_unblinded_tokens() {
-    return ConfirmationsState::Get()->get_unblinded_tokens();
-  }
-
-  WalletInfo GetWallet() {
-    Wallet wallet;
-    wallet.Set("27a39b2f-9b2e-4eb0-bbb2-2f84447496e7",
-               "x5uBvgI5MTTVY6sjGv65e9EHr8v7i+UxkFB9qVc5fP0=");
-
-    return wallet.Get();
-  }
 
   std::vector<Token> GetTokens() {
     const std::vector<std::string>
@@ -163,7 +151,7 @@ class BatAdsRefillUnblindedTokensTest : public UnitTestBase {
 
 TEST_F(BatAdsRefillUnblindedTokensTest, RefillUnblindedTokens) {
   // Arrange
-  const URLEndpoints endpoints = GetValidUrlRequestEndPoints();
+  const URLEndpoints& endpoints = GetValidUrlRequestEndPoints();
   MockUrlRequest(ads_client_mock_, endpoints);
 
   const std::vector<Token> tokens = GetTokens();
@@ -194,13 +182,13 @@ TEST_F(BatAdsRefillUnblindedTokensTest, RefillUnblindedTokens) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(50, get_unblinded_tokens()->Count());
+  EXPECT_EQ(50, privacy::get_unblinded_tokens()->Count());
 }
 
 #if BUILDFLAG(BRAVE_ADAPTIVE_CAPTCHA_ENABLED)
 TEST_F(BatAdsRefillUnblindedTokensTest, RefillUnblindedTokensCaptchaRequired) {
   // Arrange
-  const URLEndpoints endpoints = GetValidUrlRequestEndPoints();
+  const URLEndpoints& endpoints = GetValidUrlRequestEndPoints();
   MockUrlRequest(ads_client_mock_, endpoints);
 
   const std::vector<Token> tokens = GetTokens();
@@ -239,13 +227,13 @@ TEST_F(BatAdsRefillUnblindedTokensTest, RefillUnblindedTokensCaptchaRequired) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(0, get_unblinded_tokens()->Count());
+  EXPECT_EQ(0, privacy::get_unblinded_tokens()->Count());
 }
 #endif
 
 TEST_F(BatAdsRefillUnblindedTokensTest, IssuersPublicKeyMismatch) {
   // Arrange
-  const URLEndpoints endpoints = GetValidUrlRequestEndPoints();
+  const URLEndpoints& endpoints = GetValidUrlRequestEndPoints();
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
@@ -285,7 +273,7 @@ TEST_F(BatAdsRefillUnblindedTokensTest, IssuersPublicKeyMismatch) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(0, get_unblinded_tokens()->Count());
+  EXPECT_EQ(0, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest, InvalidIssuersFormat) {
@@ -312,7 +300,7 @@ TEST_F(BatAdsRefillUnblindedTokensTest, InvalidIssuersFormat) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(0, get_unblinded_tokens()->Count());
+  EXPECT_EQ(0, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest, InvalidWallet) {
@@ -335,17 +323,17 @@ TEST_F(BatAdsRefillUnblindedTokensTest, InvalidWallet) {
               OnDidRetryRefillingUnblindedTokens())
       .Times(0);
 
-  const WalletInfo& invalid_wallet;
+  const WalletInfo invalid_wallet;
   refill_unblinded_tokens_->MaybeRefill(invalid_wallet);
 
   // Assert
-  EXPECT_EQ(0, get_unblinded_tokens()->Count());
+  EXPECT_EQ(0, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest,
        RetryRequestSignedTokensAfterInternalServerError) {
   // Arrange
-  const URLEndpoints endpoints = {
+  const URLEndpoints& endpoints = {
       {// Request signed tokens
        R"(/v2/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7)",
        {{net::HTTP_INTERNAL_SERVER_ERROR, ""}, {net::HTTP_CREATED, R"(
@@ -450,12 +438,12 @@ TEST_F(BatAdsRefillUnblindedTokensTest,
   FastForwardClockBy(NextPendingTaskDelay());
 
   // Assert
-  EXPECT_EQ(50, get_unblinded_tokens()->Count());
+  EXPECT_EQ(50, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest, RequestSignedTokensMissingNonce) {
   // Arrange
-  const URLEndpoints endpoints = {
+  const URLEndpoints& endpoints = {
       {R"(/v2/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7)",
        {{net::HTTP_CREATED, ""}}}};
 
@@ -489,13 +477,13 @@ TEST_F(BatAdsRefillUnblindedTokensTest, RequestSignedTokensMissingNonce) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(0, get_unblinded_tokens()->Count());
+  EXPECT_EQ(0, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest,
        RetryGetSignedTokensAfterInternalServerError) {
   // Arrange
-  const URLEndpoints endpoints = {
+  const URLEndpoints& endpoints = {
       {// Request signed tokens
        R"(/v2/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7)",
        {{net::HTTP_CREATED, R"(
@@ -603,12 +591,12 @@ TEST_F(BatAdsRefillUnblindedTokensTest,
   FastForwardClockBy(NextPendingTaskDelay());
 
   // Assert
-  EXPECT_EQ(50, get_unblinded_tokens()->Count());
+  EXPECT_EQ(50, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensInvalidResponse) {
   // Arrange
-  const URLEndpoints endpoints = {
+  const URLEndpoints& endpoints = {
       {// Request signed tokens
        R"(/v2/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7)",
        {{net::HTTP_CREATED, R"(
@@ -650,12 +638,12 @@ TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensInvalidResponse) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(0, get_unblinded_tokens()->Count());
+  EXPECT_EQ(0, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensMissingPublicKey) {
   // Arrange
-  const URLEndpoints endpoints = {
+  const URLEndpoints& endpoints = {
       {// Request signed tokens
        R"(/v2/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7)",
        {{net::HTTP_CREATED, R"(
@@ -753,12 +741,12 @@ TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensMissingPublicKey) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(0, get_unblinded_tokens()->Count());
+  EXPECT_EQ(0, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensMissingBatchProofDleq) {
   // Arrange
-  const URLEndpoints endpoints = {
+  const URLEndpoints& endpoints = {
       {// Request signed tokens
        R"(/v2/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7)",
        {{net::HTTP_CREATED, R"(
@@ -856,12 +844,12 @@ TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensMissingBatchProofDleq) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(0, get_unblinded_tokens()->Count());
+  EXPECT_EQ(0, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensMissingSignedTokens) {
   // Arrange
-  const URLEndpoints endpoints = {
+  const URLEndpoints& endpoints = {
       {// Request signed tokens
        R"(/v2/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7)",
        {{net::HTTP_CREATED, R"(
@@ -908,12 +896,12 @@ TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensMissingSignedTokens) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(0, get_unblinded_tokens()->Count());
+  EXPECT_EQ(0, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest, GetInvalidSignedTokens) {
   // Arrange
-  const URLEndpoints endpoints = {
+  const URLEndpoints& endpoints = {
       {// Request signed tokens
        R"(/v2/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7)",
        {{net::HTTP_CREATED, R"(
@@ -1012,12 +1000,12 @@ TEST_F(BatAdsRefillUnblindedTokensTest, GetInvalidSignedTokens) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(0, get_unblinded_tokens()->Count());
+  EXPECT_EQ(0, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest, VerifyAndUnblindInvalidTokens) {
   // Arrange
-  const URLEndpoints endpoints = GetValidUrlRequestEndPoints();
+  const URLEndpoints& endpoints = GetValidUrlRequestEndPoints();
   MockUrlRequest(ads_client_mock_, endpoints);
 
   std::vector<Token> tokens = GetTokens();
@@ -1052,7 +1040,7 @@ TEST_F(BatAdsRefillUnblindedTokensTest, VerifyAndUnblindInvalidTokens) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(0, get_unblinded_tokens()->Count());
+  EXPECT_EQ(0, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest, DoNotRefillIfAboveTheMinimumThreshold) {
@@ -1082,14 +1070,14 @@ TEST_F(BatAdsRefillUnblindedTokensTest, DoNotRefillIfAboveTheMinimumThreshold) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(50, get_unblinded_tokens()->Count());
+  EXPECT_EQ(50, privacy::get_unblinded_tokens()->Count());
 }
 
 TEST_F(BatAdsRefillUnblindedTokensTest, RefillIfBelowTheMinimumThreshold) {
   // Arrange
   privacy::SetUnblindedTokens(19);
 
-  const URLEndpoints endpoints = {
+  const URLEndpoints& endpoints = {
       {// Request signed tokens
        R"(/v2/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7)",
        {{net::HTTP_CREATED, R"(
@@ -1207,7 +1195,7 @@ TEST_F(BatAdsRefillUnblindedTokensTest, RefillIfBelowTheMinimumThreshold) {
   refill_unblinded_tokens_->MaybeRefill(wallet);
 
   // Assert
-  EXPECT_EQ(50, get_unblinded_tokens()->Count());
+  EXPECT_EQ(50, privacy::get_unblinded_tokens()->Count());
 }
 
 }  // namespace ads

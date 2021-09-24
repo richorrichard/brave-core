@@ -23,10 +23,6 @@ class BatAdsUnblindedTokensTest : public UnitTestBase {
   BatAdsUnblindedTokensTest() = default;
 
   ~BatAdsUnblindedTokensTest() override = default;
-
-  UnblindedTokens* get_unblinded_tokens() {
-    return ConfirmationsState::Get()->get_unblinded_tokens();
-  }
 };
 
 TEST_F(BatAdsUnblindedTokensTest, GetToken) {

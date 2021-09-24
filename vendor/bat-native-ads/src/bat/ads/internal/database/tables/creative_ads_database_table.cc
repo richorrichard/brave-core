@@ -67,7 +67,7 @@ CreativeAdInfo GetFromRecord(mojom::DBRecord* record) {
   return creative_ad;
 }
 
-CreativeInlineContentAdMap GroupCreativeAdsFromResponse(
+CreativeAdMap GroupCreativeAdsFromResponse(
     mojom::DBCommandResponsePtr response) {
   DCHECK(response);
 
@@ -95,7 +95,7 @@ CreativeInlineContentAdMap GroupCreativeAdsFromResponse(
   return creative_ads;
 }
 
-CreativeInlineContentAdList GetCreativeAdsFromResponse(
+CreativeAdList GetCreativeAdsFromResponse(
     mojom::DBCommandResponsePtr response) {
   DCHECK(response);
 

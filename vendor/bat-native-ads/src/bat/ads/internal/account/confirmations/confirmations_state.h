@@ -9,11 +9,9 @@
 #include <memory>
 #include <string>
 
-#include "base/time/time.h"
 #include "bat/ads/ads_aliases.h"
 #include "bat/ads/internal/account/confirmations/confirmation_info_aliases.h"
 #include "bat/ads/internal/tokens/issuers/issuer_info_aliases.h"
-#include "bat/ads/transaction_info_aliases.h"
 
 namespace base {
 class DictionaryValue;
@@ -22,15 +20,14 @@ class Value;
 
 namespace ads {
 
-class AdRewards;
-
 namespace privacy {
 class UnblindedTokens;
+class UnblindedPaymentTokens;
 }  // namespace privacy
 
 class ConfirmationsState final {
  public:
-  explicit ConfirmationsState(AdRewards* ad_rewards);
+  ConfirmationsState();
   ~ConfirmationsState();
 
   static ConfirmationsState* Get();
@@ -50,19 +47,12 @@ class ConfirmationsState final {
   bool RemoveFailedConfirmation(const ConfirmationInfo& confirmation);
   void reset_failed_confirmations() { failed_confirmations_ = {}; }
 
-  TransactionList GetTransactions() const;
-  void AppendTransaction(const TransactionInfo& transaction);
-  void reset_transactions() { transactions_ = {}; }
-
-  base::Time GetNextTokenRedemptionDate() const;
-  void SetNextTokenRedemptionDate(const base::Time& next_token_redemption_date);
-
   privacy::UnblindedTokens* get_unblinded_tokens() const {
     DCHECK(is_initialized_);
     return unblinded_tokens_.get();
   }
 
-  privacy::UnblindedTokens* get_unblinded_payment_tokens() const {
+  privacy::UnblindedPaymentTokens* get_unblinded_payment_tokens() const {
     DCHECK(is_initialized_);
     return unblinded_payment_tokens_.get();
   }
@@ -70,8 +60,6 @@ class ConfirmationsState final {
  private:
   bool is_initialized_ = false;
   InitializeCallback callback_;
-
-  AdRewards* ad_rewards_ = nullptr;  // NOT OWNED
 
   std::string ToJson();
   bool FromJson(const std::string& json);
@@ -87,23 +75,10 @@ class ConfirmationsState final {
   bool ParseFailedConfirmationsFromDictionary(
       base::DictionaryValue* dictionary);
 
-  TransactionList transactions_;
-  base::Value GetTransactionsAsDictionary(
-      const TransactionList& transactions) const;
-  bool GetTransactionsFromDictionary(base::Value* dictionary,
-                                     TransactionList* transactions);
-  bool ParseTransactionsFromDictionary(base::DictionaryValue* dictionary);
-
-  base::Time next_token_redemption_date_;
-  bool ParseNextTokenRedemptionDateFromDictionary(
-      base::DictionaryValue* dictionary);
-
-  bool ParseAdRewardsFromDictionary(base::DictionaryValue* dictionary);
-
   std::unique_ptr<privacy::UnblindedTokens> unblinded_tokens_;
   bool ParseUnblindedTokensFromDictionary(base::DictionaryValue* dictionary);
 
-  std::unique_ptr<privacy::UnblindedTokens> unblinded_payment_tokens_;
+  std::unique_ptr<privacy::UnblindedPaymentTokens> unblinded_payment_tokens_;
   bool ParseUnblindedPaymentTokensFromDictionary(
       base::DictionaryValue* dictionary);
 };

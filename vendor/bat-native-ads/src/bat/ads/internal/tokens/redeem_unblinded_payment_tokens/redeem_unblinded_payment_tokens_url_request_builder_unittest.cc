@@ -18,8 +18,8 @@ using challenge_bypass_ristretto::UnblindedToken;
 
 namespace {
 
-privacy::UnblindedTokenList GetUnblindedTokens(const int count) {
-  const std::vector<std::string> unblinded_tokens_base64 = {
+privacy::UnblindedPaymentTokenList GetUnblindedPaymentTokens(const int count) {
+  const std::vector<std::string>& unblinded_payment_tokens_base64 = {
       "PLowz2WF2eGD5zfwZjk9p76HXBLDKMq/3EAZHeG/fE2XGQ48jyte+Ve50ZlasOuY"
       "L5mwA8CU2aFMlJrt3DDgC3B1+VD/uyHPfa/+bwYRrpVH5YwNSDEydVx8S4r+BYVY",
       "hfrMEltWLuzbKQ02Qixh5C/DWiJbdOoaGaidKZ7Mv+cRq5fyxJqemE/MPlARPhl6"
@@ -41,28 +41,28 @@ privacy::UnblindedTokenList GetUnblindedTokens(const int count) {
       "ujGlRHnz+UF0h8i6gYDnfeZDUj7qZZz6o29ZJFa3XN2g+yVXgRTws1yv6RAtLCr3"
       "9OQso6FAT12o8GAvHVEzmRqyzm2XU9gMK5WrNtT/fhr8gQ9RvupdznGKOqmVbuIc"};
 
-  const int modulo = unblinded_tokens_base64.size();
+  const int modulo = unblinded_payment_tokens_base64.size();
 
-  privacy::UnblindedTokenList unblinded_tokens;
+  privacy::UnblindedPaymentTokenList unblinded_payment_tokens;
   for (int i = 0; i < count; i++) {
-    privacy::UnblindedTokenInfo unblinded_token;
+    privacy::UnblindedPaymentTokenInfo unblinded_payment_token;
 
-    const std::string unblinded_token_base64 =
-        unblinded_tokens_base64.at(i % modulo);
-    unblinded_token.value =
-        UnblindedToken::decode_base64(unblinded_token_base64);
+    const std::string unblinded_payment_token_base64 =
+        unblinded_payment_tokens_base64.at(i % modulo);
+    unblinded_payment_token.value =
+        UnblindedToken::decode_base64(unblinded_payment_token_base64);
 
-    unblinded_token.public_key = PublicKey::decode_base64(
+    unblinded_payment_token.public_key = PublicKey::decode_base64(
         "RJ2i/o/pZkrH+i0aGEMY1G9FXtd7Q7gfRi3YdNRnDDk=");
 
-    unblinded_token.confirmation_type = ConfirmationType::kUndefined;
+    unblinded_payment_token.confirmation_type = ConfirmationType::kUndefined;
 
-    unblinded_token.ad_type = AdType::kUndefined;
+    unblinded_payment_token.ad_type = AdType::kUndefined;
 
-    unblinded_tokens.push_back(unblinded_token);
+    unblinded_payment_tokens.push_back(unblinded_payment_token);
   }
 
-  return unblinded_tokens;
+  return unblinded_payment_tokens;
 }
 
 }  // namespace
@@ -79,10 +79,11 @@ TEST(BatAdsRedeemUnblindedPaymentTokensRequestTest, BuildUrlForRPill) {
       "e9b1ab4f44d39eb04323411eed0b5a2ceedff01264474f86e29c707a56615650"
       "33cea0085cfd551faa170c1dd7f6daaa903cdd3138d61ed5ab2845e224d58144";
 
-  const privacy::UnblindedTokenList& unblinded_tokens = GetUnblindedTokens(7);
+  const privacy::UnblindedPaymentTokenList& unblinded_payment_tokens =
+      GetUnblindedPaymentTokens(7);
 
   RedeemUnblindedPaymentTokensUrlRequestBuilder url_request_builder(
-      wallet, unblinded_tokens);
+      wallet, unblinded_payment_tokens);
 
   // Act
   mojom::UrlRequestPtr url_request = url_request_builder.Build();
@@ -115,10 +116,11 @@ TEST(BatAdsRedeemUnblindedPaymentTokensRequestTest, BuildUrlForBPill) {
       "e9b1ab4f44d39eb04323411eed0b5a2ceedff01264474f86e29c707a56615650"
       "33cea0085cfd551faa170c1dd7f6daaa903cdd3138d61ed5ab2845e224d58144";
 
-  const privacy::UnblindedTokenList& unblinded_tokens = GetUnblindedTokens(7);
+  const privacy::UnblindedPaymentTokenList& unblinded_payment_tokens =
+      GetUnblindedPaymentTokens(7);
 
   RedeemUnblindedPaymentTokensUrlRequestBuilder url_request_builder(
-      wallet, unblinded_tokens);
+      wallet, unblinded_payment_tokens);
 
   // Act
   mojom::UrlRequestPtr url_request = url_request_builder.Build();

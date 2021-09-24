@@ -18,10 +18,6 @@ class BatAdsUnblindedTokensFrequencyCapTest : public UnitTestBase {
   BatAdsUnblindedTokensFrequencyCapTest() = default;
 
   ~BatAdsUnblindedTokensFrequencyCapTest() override = default;
-
-  privacy::UnblindedTokens* get_unblinded_tokens() {
-    return ConfirmationsState::Get()->get_unblinded_tokens();
-  }
 };
 
 TEST_F(BatAdsUnblindedTokensFrequencyCapTest, AllowAdIfDoesNotExceedCap) {

@@ -21,12 +21,13 @@ namespace privacy {
 using challenge_bypass_ristretto::PublicKey;
 using challenge_bypass_ristretto::UnblindedToken;
 
+UnblindedTokens* get_unblinded_tokens() {
+  return ConfirmationsState::Get()->get_unblinded_tokens();
+}
+
 UnblindedTokenList SetUnblindedTokens(const int count) {
   const UnblindedTokenList& unblinded_tokens = GetUnblindedTokens(count);
-
-  ConfirmationsState::Get()->get_unblinded_tokens()->SetTokens(
-      unblinded_tokens);
-
+  get_unblinded_tokens()->SetTokens(unblinded_tokens);
   return unblinded_tokens;
 }
 
@@ -41,10 +42,6 @@ UnblindedTokenInfo CreateUnblindedToken(
       PublicKey::decode_base64("RJ2i/o/pZkrH+i0aGEMY1G9FXtd7Q7gfRi3YdNRnDDk=");
   DCHECK(!ExceptionOccurred());
 
-  unblinded_token.confirmation_type = ConfirmationType::kUndefined;
-
-  unblinded_token.ad_type = AdType::kUndefined;
-
   return unblinded_token;
 }
 
@@ -53,7 +50,7 @@ UnblindedTokenList CreateUnblindedTokens(
   UnblindedTokenList unblinded_tokens;
 
   for (const auto& unblinded_token_base64 : unblinded_tokens_base64) {
-    UnblindedTokenInfo unblinded_token =
+    const UnblindedTokenInfo& unblinded_token =
         CreateUnblindedToken(unblinded_token_base64);
 
     unblinded_tokens.push_back(unblinded_token);
@@ -63,7 +60,7 @@ UnblindedTokenList CreateUnblindedTokens(
 }
 
 UnblindedTokenList GetUnblindedTokens(const int count) {
-  const std::vector<std::string> unblinded_tokens_base64 = {
+  const std::vector<std::string>& unblinded_tokens_base64 = {
       R"(PLowz2WF2eGD5zfwZjk9p76HXBLDKMq/3EAZHeG/fE2XGQ48jyte+Ve50ZlasOuYL5mwA8CU2aFMlJrt3DDgC3B1+VD/uyHPfa/+bwYRrpVH5YwNSDEydVx8S4r+BYVY)",
       R"(hfrMEltWLuzbKQ02Qixh5C/DWiJbdOoaGaidKZ7Mv+cRq5fyxJqemE/MPlARPhl6NgXPHUeyaxzd6/Lk6YHlfXbBA023DYvGMHoKm15NP/nWnZ1V3iLkgOOHZuk80Z4K)",
       R"(bbpQ1DcxfDA+ycNg9WZvIwinjO0GKnCon1UFxDLoDOLZVnKG3ufruNZi/n8dO+G2AkTiWkUKbi78xCyKsqsXnGYUlA/6MMEOzmR67rZhMwdJHr14Fu+TCI9JscDlWepa)",
@@ -95,9 +92,9 @@ UnblindedTokenList GetRandomUnblindedTokens(const int count) {
   UnblindedTokenList unblinded_tokens;
 
   TokenGenerator token_generator;
-  const std::vector<Token> tokens = token_generator.Generate(count);
+  const std::vector<Token>& tokens = token_generator.Generate(count);
   for (const auto& token : tokens) {
-    const std::string token_base64 = token.encode_base64();
+    const std::string& token_base64 = token.encode_base64();
     const UnblindedTokenInfo& unblinded_token =
         CreateUnblindedToken(token_base64);
 

@@ -6,10 +6,15 @@
 #ifndef BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_ACCOUNT_ACCOUNT_OBSERVER_H_
 #define BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_ACCOUNT_ACCOUNT_OBSERVER_H_
 
+#include <string>
+
 #include "base/observer_list_types.h"
 
 namespace ads {
 
+class AdType;
+class ConfirmationType;
+struct TransactionInfo;
 struct WalletInfo;
 
 class AccountObserver : public base::CheckedObserver {
@@ -22,6 +27,19 @@ class AccountObserver : public base::CheckedObserver {
 
   // Invoked if the wallet is invalid
   virtual void OnInvalidWallet() {}
+
+  // Invoked when funds are deposited for |creative_instance_id|, |ad_type| and
+  // |transaction|
+  virtual void OnDepositedFunds(const std::string& creative_instance_id,
+                                const AdType& ad_type,
+                                const TransactionInfo& transaction) {}
+
+  // Invoked when funds failed to deposit for |creative_instance_id|, |ad_type|
+  // and |transaction|
+  virtual void OnFailedToDepositFunds(
+      const std::string& creative_instance_id,
+      const AdType& ad_type,
+      const ConfirmationType& confirmation_type) {}
 
   // Invoked when the statement of accounts has changed
   virtual void OnStatementOfAccountsDidChange() {}
