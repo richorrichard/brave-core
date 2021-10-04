@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "base/strings/utf_string_conversions.h"
-#include "brave/browser/ui/webui/trezor_bridge/trezor_bridge_ui.h"
 #include "url/gurl.h"
 
 TrezorBridgePageHandler::TrezorBridgePageHandler(

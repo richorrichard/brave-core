@@ -13,7 +13,6 @@
 #include "brave/components/brave_wallet/common/brave_wallet.mojom.h"
 #include "brave/components/trezor_bridge/mojo_trezor_web_ui_controller.h"
 #include "components/keyed_service/core/keyed_service.h"
-#include "content/public/browser/browser_context.h"
 #include "mojo/public/cpp/bindings/pending_receiver.h"
 #include "mojo/public/cpp/bindings/pending_remote.h"
 #include "mojo/public/cpp/bindings/receiver_set.h"
@@ -35,7 +34,7 @@ class TrezorBridgeContentObserver {
 
 class TrezorBridgeContentProxy {
  public:
-  explicit TrezorBridgeContentProxy(content::BrowserContext* browser_context) {}
+  TrezorBridgeContentProxy() {}
   virtual ~TrezorBridgeContentProxy() = default;
 
   virtual void SetObserver(TrezorBridgeContentObserver* observer) = 0;
@@ -52,7 +51,6 @@ class TrezorBridgeController : public KeyedService,
                                public TrezorBridgeContentObserver {
  public:
   explicit TrezorBridgeController(
-      content::BrowserContext* browser_context,
       std::unique_ptr<TrezorBridgeContentProxy> content_proxy);
   ~TrezorBridgeController() override;
 
@@ -74,7 +72,6 @@ class TrezorBridgeController : public KeyedService,
   void OnUnlocked(bool success, const std::string& error) override;
 
  private:
-  void InitWebContents(content::BrowserContext* browser_context);
   bool IsUnlocked() const;
 
   void BridgeReady() override;

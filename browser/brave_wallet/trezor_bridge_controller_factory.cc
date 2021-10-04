@@ -52,8 +52,7 @@ TrezorBridgeControllerFactory::~TrezorBridgeControllerFactory() {}
 
 KeyedService* TrezorBridgeControllerFactory::BuildServiceInstanceFor(
     content::BrowserContext* context) const {
-  return new TrezorBridgeController(
-      context, std::make_unique<TrezorContentProxy>(context));
+  return new TrezorBridgeController(std::make_unique<TrezorContentProxy>(context));
 }
 
 content::BrowserContext* TrezorBridgeControllerFactory::GetBrowserContextToUse(

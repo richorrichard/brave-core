@@ -28,7 +28,7 @@ content::WebContents::CreateParams GetWebContentsCreateParams(
 }  // namespace
 
 TrezorContentProxy::TrezorContentProxy(content::BrowserContext* context)
-    : TrezorBridgeContentProxy(context), browser_context_(context) {}
+    : TrezorBridgeContentProxy(), browser_context_(context) {}
 
 TrezorContentProxy::~TrezorContentProxy() {}
 

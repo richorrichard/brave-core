@@ -27,6 +27,7 @@ static_library("trezor_bridge") {
     "//brave/components/resources:static_resources",
     "//brave/components/resources:strings_grit",
     "//content/public/browser",
+    "//ui/webui:webui"
   ]
 }
 

@@ -10,20 +10,15 @@
 #include <utility>
 
 #include "base/gtest_prod_util.h"
-#include "brave/browser/ui/webui/trezor_bridge/trezor_bridge_ui.h"
-#include "brave/common/webui_url_constants.h"
 #include "brave/components/brave_wallet/common/brave_wallet.mojom.h"
 #include "components/keyed_service/core/keyed_service.h"
-#include "content/public/browser/web_contents.h"
 #include "mojo/public/cpp/bindings/pending_receiver.h"
 #include "mojo/public/cpp/bindings/pending_remote.h"
 #include "mojo/public/cpp/bindings/receiver_set.h"
-#include "third_party/abseil-cpp/absl/types/optional.h"
 
 namespace brave_wallet {
 
 TrezorBridgeController::TrezorBridgeController(
-    content::BrowserContext* browser_context,
     std::unique_ptr<TrezorBridgeContentProxy> content_proxy)
     : content_proxy_(std::move(content_proxy)) {
   content_proxy_->SetObserver(this);
