@@ -28,7 +28,7 @@ class TrezorBridgeHandler : public content::WebUIMessageHandler {
       scoped_refptr<network::SharedURLLoaderFactory> url_loader_factory);
   ~TrezorBridgeHandler() override;
 
-  void HandleFetchRequest(const base::ListValue* args);
+  void HandleFetchRequest(base::Value::ConstListView args);
   void SetRequestCallbackForTesting(
       base::OnceCallback<void(const base::Value&)> callback) {
     callback_for_testing_ = std::move(callback);
