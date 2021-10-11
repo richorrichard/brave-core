@@ -3,42 +3,44 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 
-import { sendWithPromise } from 'chrome://resources/js/cr.m'
-
-// Hooks to trick some checks inside TrezorConnect to use webextension env.
-function setupBraveHooks () {
-  // @ts-ignore
-  window.sendWithPromise = sendWithPromise
-}
-
-setupBraveHooks()
-
 import TrezorConnect, {
-  TRANSPORT_EVENT,
-  DEVICE_EVENT,
-  TRANSPORT
+  UI,
+  UI_EVENT
 } from 'trezor-connect'
 
-// Listen to TRANSPORT_EVENT
-TrezorConnect.on(TRANSPORT_EVENT, event => {
-  if (event.type === TRANSPORT.ERROR) {
-    console.log('Transport is missing')
+TrezorConnect.on(UI_EVENT, (event) => {
+  if (event.type === UI.REQUEST_PASSPHRASE) {
+    const features = event.payload.device.features
+    if (features && features.capabilities && features.capabilities.includes('Capability_PassphraseEntry')) {
+      // choose to enter passphrase on device
+      TrezorConnect.uiResponse({
+        type: UI.RECEIVE_PASSPHRASE,
+        payload: { passphraseOnDevice: true, value: '', save: true }
+      })
+    } else {
+      TrezorConnect.uiResponse({
+        type: UI.RECEIVE_PASSPHRASE,
+        payload: { value: '', save: true }
+      })
+    }
   }
-  if (event.type === TRANSPORT.START) {
-    console.log(event)
+  if (event.type === UI.SELECT_DEVICE) {
+    if (event.payload.devices.length > 0) {
+      // More then one device connected,
+      // We take first in the list now for simpicity
+      TrezorConnect.uiResponse({
+        type: UI.RECEIVE_DEVICE,
+        payload: { device: event.payload.devices[0], remember: true }
+      })
+    } else {
+      console.log('no devices connected, waiting for connection')
+    }
   }
-})
-
-// Listen to DEVICE_EVENT
-TrezorConnect.on(DEVICE_EVENT, event => {
-  console.log(event.type)
 })
 
 TrezorConnect.init({
-  connectSrc: './trezor/',
-  popup: false, // render your own UI
   webusb: false, // webusb is not supported
-  debug: false, // see what's going on inside connect
+  debug: true, // see what's going on inside connect
   // lazyLoad: true, // set to "false" (default) if you want to start communication with bridge on application start (and detect connected device right away)
   // set it to "true", then trezor-connect will not be initialized until you call some TrezorConnect.method()
   // this is useful when you don't know if you are dealing with Trezor user

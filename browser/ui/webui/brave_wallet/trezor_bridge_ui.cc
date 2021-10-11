@@ -20,11 +20,20 @@
 #include "content/public/browser/web_ui_message_handler.h"
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/resources/grit/webui_generated_resources.h"
+#include "ui/webui/webui_allowlist.h"
 
 using content::WebUIMessageHandler;
 
 TrezorBridgeUI::TrezorBridgeUI(content::WebUI* web_ui, const std::string& name)
     : WebUIController(web_ui) {
+
+  auto* allowlist = WebUIAllowlist::GetOrCreate(web_ui->GetWebContents()
+                        ->GetBrowserContext());
+  const url::Origin host_origin =
+      url::Origin::Create(GURL("chrome://trezor-bridge/"));
+  allowlist->RegisterAutoGrantedPermission(
+      host_origin, ContentSettingsType::POPUPS);
+
   auto* html_source = CreateAndAddWebUIDataSource(
       web_ui, name, kTrezorBridgeGenerated, kTrezorBridgeGeneratedSize,
       IDR_TREZOR_BRIDGE_HTML);
@@ -32,13 +41,16 @@ TrezorBridgeUI::TrezorBridgeUI(content::WebUI* web_ui, const std::string& name)
 
   html_source->OverrideContentSecurityPolicy(
       network::mojom::CSPDirectiveName::FrameSrc,
-      "frame-src chrome://trezor-bridge;");
-  html_source->OverrideContentSecurityPolicy(
-      network::mojom::CSPDirectiveName::FrameAncestors,
-      "frame-ancestors chrome://trezor-bridge;");
+      "frame-src https://connect.trezor.io/;");
   html_source->OverrideContentSecurityPolicy(
       network::mojom::CSPDirectiveName::ScriptSrc,
-      "script-src chrome://resources/ chrome://trezor-bridge ;");
+      "script-src chrome://resources/ chrome://trezor-bridge/ https://connect.trezor.io/ 'unsafe-inline';");
+  html_source->OverrideContentSecurityPolicy(
+      network::mojom::CSPDirectiveName::RequireTrustedTypesFor,
+      "");
+  html_source->OverrideContentSecurityPolicy(
+      network::mojom::CSPDirectiveName::TrustedTypes,
+      "");
   // Disable DenyXFrame to allow TrezorConnect to create iframes.
   html_source->DisableDenyXFrameOptions();
   auto url_loader = web_ui->GetWebContents()
