@@ -185,7 +185,7 @@ bool EthTransaction::ProcessVRS(const std::string& v,
 
   std::vector<uint8_t> r_decoded;
   if (!base::HexStringToBytes(r, &r_decoded)) {
-    LOG(ERROR) << "Unable to decode r param";
+    LOG(ERROR) << "Unable to decode r param:" << r;
     return false;
   }
   std::vector<uint8_t> s_decoded;

@@ -36,8 +36,10 @@
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/web_ui.h"
 #include "content/public/browser/web_ui_data_source.h"
+#include "content/public/common/url_constants.h"
 #include "ui/base/accelerators/accelerator.h"
 #include "ui/base/webui/web_ui_util.h"
+#include "ui/webui/webui_allowlist.h"
 
 namespace {
 
@@ -62,13 +64,28 @@ WalletPanelUI::WalletPanelUI(content::WebUI* web_ui)
                                     true /* Needed for webui browser tests */) {
   content::WebUIDataSource* source =
       content::WebUIDataSource::Create(kWalletPanelHost);
-
+  web_ui->AddRequestableScheme(content::kChromeUIUntrustedScheme);
   source->AddLocalizedStrings(brave_wallet::kLocalizedStrings);
   webui::SetupWebUIDataSource(source,
                               base::make_span(kBraveWalletPanelGenerated,
                                               kBraveWalletPanelGeneratedSize),
                               IDR_WALLET_PANEL_HTML);
+  source->OverrideContentSecurityPolicy(
+      network::mojom::CSPDirectiveName::FrameSrc,
+      std::string("frame-src ") + kUntrustedTrezorURL + ";");
+
   auto* profile = Profile::FromWebUI(web_ui);
+  auto* allowlist = WebUIAllowlist::GetOrCreate(profile);
+  allowlist->RegisterAutoGrantedPermission(
+    url::Origin::Create(GURL(kBraveUIWalletPanelURL)),
+    ContentSettingsType::POPUPS);
+  allowlist->RegisterAutoGrantedPermission(
+    url::Origin::Create(GURL(kUntrustedTrezorURL)),
+    ContentSettingsType::POPUPS);
+  allowlist->RegisterAutoGrantedPermission(
+    url::Origin::Create(GURL("https://localhost:8088/")),
+    ContentSettingsType::POPUPS);
+
   content::WebUIDataSource::Add(profile, source);
   brave_wallet::AddERCTokenImageSource(profile);
 }

@@ -20,6 +20,7 @@ UntrustedTrezorUI::UntrustedTrezorUI(content::WebUI* web_ui)
   untrusted_source->AddResourcePath("trezor.js",
                                     IDR_BRAVE_WALLET_TREZOR_BRIDGE_JS);
   untrusted_source->AddFrameAncestor(GURL(kBraveUIWalletPageURL));
+  untrusted_source->AddFrameAncestor(GURL(kBraveUIWalletPanelURL));
   untrusted_source->OverrideContentSecurityPolicy(
       network::mojom::CSPDirectiveName::ScriptSrc,
       std::string("script-src 'self' https://connect.trezor.io/;"));

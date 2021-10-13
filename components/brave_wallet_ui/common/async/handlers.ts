@@ -31,7 +31,9 @@ import {
   SwapResponse,
   TransactionInfo,
   WalletAccountType,
-  WalletState
+  WalletState,
+  kLedgerHardwareVendor,
+  kTrezorHardwareVendor
 } from '../../constants/types'
 import { toWeiHex } from '../../utils/format-balances'
 import getSwapConfig from '../../constants/swap.config'
@@ -367,18 +369,26 @@ handler.on(WalletActions.approveERC20Allowance.getType(), async (store: Store, p
 handler.on(WalletActions.approveTransaction.getType(), async (store: Store, txInfo: TransactionInfo) => {
   const apiProxy = await getAPIProxy()
   const hardwareAccount = await findHardwareAccountInfo(txInfo.fromAddress)
-  if (hardwareAccount && hardwareAccount.hardware) {
-    const { success, message } = await apiProxy.ethTxController.approveHardwareTransaction(txInfo.id)
-    if (success) {
-      let deviceKeyring = await apiProxy.getKeyringsByType(hardwareAccount.hardware.vendor)
-      const { v, r, s } = await deviceKeyring.signTransaction(hardwareAccount.hardware.path, message.replace('0x', ''))
-      await apiProxy.ethTxController.processLedgerSignature(txInfo.id, '0x' + v, r, s)
-      await refreshWalletInfo(store)
-    }
+  if (!hardwareAccount || !hardwareAccount.hardware) {
+    await apiProxy.ethTxController.approveTransaction(txInfo.id)
+    await refreshWalletInfo(store)
     return
   }
-
-  await apiProxy.ethTxController.approveTransaction(txInfo.id)
+  console.log(hardwareAccount)
+  let deviceKeyring = await apiProxy.getKeyringsByType(hardwareAccount.hardware.vendor)
+  const { success, message } = await apiProxy.ethTxController.approveHardwareTransaction(txInfo.id)
+  if (hardwareAccount.hardware.vendor == kLedgerHardwareVendor) {
+    console.log(success, message, txInfo)
+    if (success) {
+      const { v, r, s } = await deviceKeyring.signTransaction(hardwareAccount.hardware.path, message.replace('0x', ''))
+      await apiProxy.ethTxController.processLedgerSignature(txInfo.id, '0x' + v, r, s)
+    }
+  } else if (hardwareAccount.hardware.vendor == kTrezorHardwareVendor) {
+      const chainId = await apiProxy.ethJsonRpcController.getChainId()
+      const { v, r, s } = await deviceKeyring.signTransaction(hardwareAccount.hardware.path, txInfo, chainId.chainId)
+      console.log(v, r.replace('0x', ''), s.replace('0x', ''))
+      await apiProxy.ethTxController.processLedgerSignature(txInfo.id, v, r.replace('0x', ''), s.replace('0x', ''))
+  }
   await refreshWalletInfo(store)
 })
 
