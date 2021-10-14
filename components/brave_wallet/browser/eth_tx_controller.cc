@@ -394,7 +394,8 @@ void EthTxController::OnGetNextNonceForHardware(
     ApproveHardwareTransactionCallback callback,
     bool success,
     uint256_t nonce) {
-  DLOG(INFO) << "success:" << success << " nonce:" << brave_wallet::Uint256ValueToHex(nonce);
+  DLOG(INFO) << "success:" << success
+             << " nonce:" << brave_wallet::Uint256ValueToHex(nonce);
   if (!success) {
     meta->status = mojom::TransactionStatus::Error;
     tx_state_manager_->AddOrUpdateTx(*meta);
@@ -519,7 +520,8 @@ void EthTxController::OnGetNextNonce(
 void EthTxController::PublishTransaction(
     const std::string& tx_meta_id,
     const std::string& signed_transaction) {
-  DLOG(INFO) << "PublishTransaction:" << tx_meta_id << " trasnaction:" << signed_transaction;
+  DLOG(INFO) << "PublishTransaction:" << tx_meta_id
+             << " trasnaction:" << signed_transaction;
   rpc_controller_->SendRawTransaction(
       signed_transaction,
       base::BindOnce(&EthTxController::OnPublishTransaction,

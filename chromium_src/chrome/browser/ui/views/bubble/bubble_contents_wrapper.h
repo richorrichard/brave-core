@@ -7,21 +7,19 @@
 #define BRAVE_CHROMIUM_SRC_CHROME_BROWSER_UI_VIEWS_BUBBLE_BUBBLE_CONTENTS_WRAPPER_H_
 
 #include "chrome/browser/ui/views/bubble/bubble_contents_wrapper.h"
+#include "content/public/browser/web_contents.h"
 #include "content/public/browser/web_contents_delegate.h"
 #include "content/public/browser/web_contents_observer.h"
-#include "content/public/browser/web_contents.h"
 #include "ui/base/window_open_disposition.h"
 #include "url/gurl.h"
 
 #define RenderViewHostChanged                                               \
-    AddNewContents(content::WebContents* source,                            \
-                      std::unique_ptr<content::WebContents> new_contents,   \
-                      const GURL& target_url,                               \
-                      WindowOpenDisposition disposition,                    \
-                      const gfx::Rect& initial_rect,                        \
-                      bool user_gesture,                                    \
-                      bool* was_blocked) override;                          \
-    void RenderViewHostChanged
+  AddNewContents(content::WebContents* source,                              \
+                 std::unique_ptr<content::WebContents> new_contents,        \
+                 const GURL& target_url, WindowOpenDisposition disposition, \
+                 const gfx::Rect& initial_rect, bool user_gesture,          \
+                 bool* was_blocked) override;                               \
+  void RenderViewHostChanged
 #include "../../../../../../../chrome/browser/ui/views/bubble/bubble_contents_wrapper.h"
 #undef RenderViewHostChanged
 
