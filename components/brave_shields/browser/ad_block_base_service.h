@@ -40,7 +40,7 @@ class AdBlockBaseService : public BaseBraveShieldsService {
   using GetDATFileDataResult =
       brave_component_updater::LoadDATFileDataResult<adblock::Engine>;
 
-  explicit AdBlockBaseService(BraveComponent::Delegate* delegate);
+  explicit AdBlockBaseService(scoped_refptr<base::SequencedTaskRunner> task_runner);
   ~AdBlockBaseService() override;
 
   void ShouldStartRequest(const GURL& url,

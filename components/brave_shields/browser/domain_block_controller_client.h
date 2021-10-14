@@ -22,7 +22,7 @@ class MetricsHelper;
 
 namespace brave_shields {
 
-class AdBlockCustomFiltersService;
+class AdBlockCustomFiltersSourceProvider;
 
 class DomainBlockControllerClient
     : public security_interstitials::SecurityInterstitialControllerClient {
@@ -33,7 +33,7 @@ class DomainBlockControllerClient
   DomainBlockControllerClient(
       content::WebContents* web_contents,
       const GURL& request_url,
-      AdBlockCustomFiltersService* ad_block_custom_filters_service,
+      AdBlockCustomFiltersSourceProvider* ad_block_custom_filters_source_provider,
       PrefService* prefs,
       const std::string& locale);
   ~DomainBlockControllerClient() override = default;
@@ -50,7 +50,7 @@ class DomainBlockControllerClient
 
  private:
   const GURL request_url_;
-  AdBlockCustomFiltersService* ad_block_custom_filters_service_;
+  AdBlockCustomFiltersSourceProvider* ad_block_custom_filters_source_provider_;
   bool dont_warn_again_;
 };
 

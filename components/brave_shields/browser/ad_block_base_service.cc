@@ -104,8 +104,8 @@ std::string ResourceTypeToString(blink::mojom::ResourceType resource_type) {
 
 namespace brave_shields {
 
-AdBlockBaseService::AdBlockBaseService(BraveComponent::Delegate* delegate)
-    : BaseBraveShieldsService(delegate),
+AdBlockBaseService::AdBlockBaseService(scoped_refptr<base::SequencedTaskRunner> task_runner)
+    : BaseBraveShieldsService(task_runner),
       ad_block_client_(new adblock::Engine()),
       weak_factory_(this) {}
 

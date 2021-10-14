@@ -92,15 +92,15 @@ const char kHTTPSEverywhereComponentBase64PublicKey[] =
     "JwIDAQAB";
 
 bool HTTPSEverywhereService::g_ignore_port_for_test_(false);
-std::string HTTPSEverywhereService::g_https_everywhere_component_id_(
+/*std::string HTTPSEverywhereService::g_https_everywhere_component_id_(
     kHTTPSEverywhereComponentId);
 std::string
 HTTPSEverywhereService::g_https_everywhere_component_base64_public_key_(
-    kHTTPSEverywhereComponentBase64PublicKey);
+    kHTTPSEverywhereComponentBase64PublicKey);*/
 
 HTTPSEverywhereService::HTTPSEverywhereService(
-    BraveComponent::Delegate* delegate)
-    : BaseBraveShieldsService(delegate),
+    scoped_refptr<base::SequencedTaskRunner> task_runner)
+    : BaseBraveShieldsService(task_runner),
       level_db_(nullptr) {
   DETACH_FROM_SEQUENCE(sequence_checker_);
 }
@@ -110,9 +110,9 @@ HTTPSEverywhereService::~HTTPSEverywhereService() {
 }
 
 bool HTTPSEverywhereService::Init() {
-  Register(kHTTPSEverywhereComponentName,
+  /*Register(kHTTPSEverywhereComponentName,
            g_https_everywhere_component_id_,
-           g_https_everywhere_component_base64_public_key_);
+           g_https_everywhere_component_base64_public_key_);*/
   return true;
 }
 
@@ -144,14 +144,14 @@ void HTTPSEverywhereService::InitDB(const base::FilePath& install_dir) {
   }
 }
 
-void HTTPSEverywhereService::OnComponentReady(
+/*void HTTPSEverywhereService::OnComponentReady(
     const std::string& component_id,
     const base::FilePath& install_dir,
     const std::string& manifest) {
   GetTaskRunner()->PostTask(
       FROM_HERE, base::BindOnce(&HTTPSEverywhereService::InitDB, AsWeakPtr(),
                                 install_dir));
-}
+}*/
 
 bool HTTPSEverywhereService::GetHTTPSURL(
     const GURL* url,
@@ -383,12 +383,12 @@ void HTTPSEverywhereService::CloseDatabase() {
 }
 
 // static
-void HTTPSEverywhereService::SetComponentIdAndBase64PublicKeyForTest(
+/*void HTTPSEverywhereService::SetComponentIdAndBase64PublicKeyForTest(
     const std::string& component_id,
     const std::string& component_base64_public_key) {
   g_https_everywhere_component_id_ = component_id;
   g_https_everywhere_component_base64_public_key_ = component_base64_public_key;
-}
+}*/
 
 // static
 void HTTPSEverywhereService::SetIgnorePortForTest(bool ignore) {
@@ -400,8 +400,8 @@ void HTTPSEverywhereService::SetIgnorePortForTest(bool ignore) {
 // The brave shields factory. Using the Brave Shields as a singleton
 // is the job of the browser process.
 std::unique_ptr<HTTPSEverywhereService> HTTPSEverywhereServiceFactory(
-    BraveComponent::Delegate* delegate) {
-  return std::make_unique<HTTPSEverywhereService>(delegate);
+    scoped_refptr<base::SequencedTaskRunner> task_runner) {
+  return std::make_unique<HTTPSEverywhereService>(task_runner);
 }
 
 }  // namespace brave_shields

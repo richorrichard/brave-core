@@ -46,7 +46,7 @@ struct HTTPSE_REDIRECTS_COUNT_ST {
 class HTTPSEverywhereService : public BaseBraveShieldsService,
                          public base::SupportsWeakPtr<HTTPSEverywhereService> {
  public:
-  explicit HTTPSEverywhereService(BraveComponent::Delegate* delegate);
+  explicit HTTPSEverywhereService(scoped_refptr<base::SequencedTaskRunner> task_runner);
   ~HTTPSEverywhereService() override;
   bool GetHTTPSURL(const GURL* url,
                    const uint64_t& request_id,
@@ -57,9 +57,9 @@ class HTTPSEverywhereService : public BaseBraveShieldsService,
 
  protected:
   bool Init() override;
-  void OnComponentReady(const std::string& component_id,
+  /*void OnComponentReady(const std::string& component_id,
       const base::FilePath& install_dir,
-      const std::string& manifest) override;
+      const std::string& manifest) override;*/
 
   void AddHTTPSEUrlToRedirectList(const uint64_t& request_id);
   bool ShouldHTTPSERedirect(const uint64_t& request_id);
@@ -70,8 +70,8 @@ class HTTPSEverywhereService : public BaseBraveShieldsService,
  private:
   friend class ::HTTPSEverywhereServiceTest;
   static bool g_ignore_port_for_test_;
-  static std::string g_https_everywhere_component_id_;
-  static std::string g_https_everywhere_component_base64_public_key_;
+  /*static std::string g_https_everywhere_component_id_;
+  static std::string g_https_everywhere_component_base64_public_key_;*/
   static void SetIgnorePortForTest(bool ignore);
   static void SetComponentIdAndBase64PublicKeyForTest(
       const std::string& component_id,
@@ -92,7 +92,7 @@ class HTTPSEverywhereService : public BaseBraveShieldsService,
 
 // Creates the HTTPSEverywhereService
 std::unique_ptr<HTTPSEverywhereService> HTTPSEverywhereServiceFactory(
-    BraveComponent::Delegate* delegate);
+    scoped_refptr<base::SequencedTaskRunner> task_runner);
 
 }  // namespace brave_shields
 
