@@ -13,6 +13,7 @@
 #include "base/scoped_observation.h"
 #include "brave/browser/extensions/api/brave_action_api.h"
 #include "brave/browser/ui/views/brave_actions/brave_rewards_action_stub_view.h"
+#include "brave/browser/ui/views/brave_actions/brave_shields_action_view.h"
 #include "brave/components/brave_rewards/browser/rewards_service.h"
 #include "chrome/browser/extensions/api/extension_action/extension_action_api.h"
 #include "chrome/browser/ui/browser.h"
@@ -45,7 +46,8 @@ class BraveActionsContainer : public views::View,
                               public extensions::ExtensionActionAPI::Observer,
                               public extensions::ExtensionRegistryObserver,
                               public ToolbarActionView::Delegate,
-                              public BraveRewardsActionStubView::Delegate {
+                              public BraveRewardsActionStubView::Delegate,
+                              public BraveShieldsActionView::Delegate {
  public:
   BraveActionsContainer(Browser* browser, Profile* profile);
   ~BraveActionsContainer() override;
@@ -130,6 +132,7 @@ class BraveActionsContainer : public views::View,
   void AddAction(const std::string& id);
   bool ShouldAddBraveRewardsAction() const;
   void AddActionStubForRewards();
+  void AddActionViewForShields();
   void RemoveAction(const std::string& id);
   void ShowAction(const std::string& id, bool show);
   bool IsActionShown(const std::string& id) const;
@@ -171,6 +174,8 @@ class BraveActionsContainer : public views::View,
   base::ScopedObservation<extensions::BraveActionAPI,
                           extensions::BraveActionAPI::Observer>
       brave_action_observer_{this};
+
+  BraveShieldsActionView* shields_action_btn_ = nullptr;
 
   // Listen for Brave Rewards preferences changes.
   BooleanPrefMember brave_rewards_enabled_;
