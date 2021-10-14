@@ -385,6 +385,9 @@ handler.on(WalletActions.approveTransaction.getType(), async (store: Store, txIn
     }
   } else if (hardwareAccount.hardware.vendor == kTrezorHardwareVendor) {
       const chainId = await apiProxy.ethJsonRpcController.getChainId()
+      // TODO(spylogsster): Think how to get correct nonce from native side.
+      const { success, message } = await apiProxy.ethTxController.approveHardwareTransaction(txInfo.id)
+      console.log(success, message)
       const { v, r, s } = await deviceKeyring.signTransaction(hardwareAccount.hardware.path, txInfo, chainId.chainId)
       console.log(v, r.replace('0x', ''), s.replace('0x', ''))
       await apiProxy.ethTxController.processLedgerSignature(txInfo.id, v, r.replace('0x', ''), s.replace('0x', ''))

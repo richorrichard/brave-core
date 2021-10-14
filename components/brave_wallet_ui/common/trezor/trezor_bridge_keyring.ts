@@ -141,12 +141,13 @@ export default class TrezorBridgeKeyring extends EventEmitter {
       data: Buffer.from(txInfo.txData.baseData.data)
     }
     const tx = new Transaction(txParams)
+    console.log("chainId:", chainId)
     return {
       path: path,
       transaction: {
         to: this._normalize(tx.to),
         value: this._normalize(tx.value),
-        data: this._normalize(tx.data),
+        data: this._normalize(tx.data).replace('0x', ''),
         chainId: parseInt(chainId, 16),
         nonce: this._normalize(tx.nonce),
         gasLimit: this._normalize(tx.gasLimit),

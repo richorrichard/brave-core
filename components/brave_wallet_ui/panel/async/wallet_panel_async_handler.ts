@@ -259,8 +259,8 @@ handler.on(WalletActions.transactionStatusChanged.getType(), async (store: Store
     payload.txInfo.txStatus === TransactionStatus.Rejected ||
     payload.txInfo.txStatus === TransactionStatus.Approved) {
     if (state.selectedPanel === 'approveTransaction' && walletState.pendingTransactions.length === 0) {
-      const apiProxy = await getAPIProxy()
-      apiProxy.closeUI()
+      //const apiProxy = await getAPIProxy()
+      //apiProxy.closeUI()
     }
   }
 })

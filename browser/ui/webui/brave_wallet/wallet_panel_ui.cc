@@ -77,13 +77,7 @@ WalletPanelUI::WalletPanelUI(content::WebUI* web_ui)
   auto* profile = Profile::FromWebUI(web_ui);
   auto* allowlist = WebUIAllowlist::GetOrCreate(profile);
   allowlist->RegisterAutoGrantedPermission(
-    url::Origin::Create(GURL(kBraveUIWalletPanelURL)),
-    ContentSettingsType::POPUPS);
-  allowlist->RegisterAutoGrantedPermission(
     url::Origin::Create(GURL(kUntrustedTrezorURL)),
-    ContentSettingsType::POPUPS);
-  allowlist->RegisterAutoGrantedPermission(
-    url::Origin::Create(GURL("https://localhost:8088/")),
     ContentSettingsType::POPUPS);
 
   content::WebUIDataSource::Add(profile, source);

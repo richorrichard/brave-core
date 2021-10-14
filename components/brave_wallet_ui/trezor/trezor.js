@@ -33,7 +33,7 @@ const getAccounts = async(responseId, source, requestedPaths, owner) => {
 }
 
 const signTransaction = async(responseId, source, owner, payload) => {
-    console.log(payload)
+    console.log(JSON.stringify(payload))
     TrezorConnect.ethereumSignTransaction(payload).then((result) => {
         console.log(result)
         source.postMessage({ id: responseId, command: kTrezorSignTransactionCommand, payload: result }, owner)
