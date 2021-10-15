@@ -52,6 +52,8 @@ source_set("ui") {
     "webui/brave_webui_source.h",
     "webui/webcompat_reporter_ui.cc",
     "webui/webcompat_reporter_ui.h",
+    "webui/brave_shields/shields_panel_ui.cc",
+    "webui/brave_shields/shields_panel_ui.h",
   ]
 
   if (enable_ipfs) {
@@ -308,6 +310,7 @@ source_set("ui") {
     "//ui/gfx",
     "//ui/resources",
     "//url",
+    "//ui/webui:webui",
   ]
 
   if (toolkit_views) {
