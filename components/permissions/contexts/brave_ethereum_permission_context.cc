@@ -27,12 +27,12 @@ namespace {
 bool IsAccepted(PermissionRequest* request,
                 const std::vector<std::string>& accounts) {
   for (const auto& account : accounts) {
+    DLOG(INFO) << request->requesting_origin().host_piece() << " = "  << account;
     if (base::EndsWith(request->requesting_origin().host_piece(), account,
                        base::CompareCase::INSENSITIVE_ASCII)) {
       return true;
     }
   }
-
   return false;
 }
 
@@ -133,13 +133,14 @@ void BraveEthereumPermissionContext::Cancel(
 // static
 void BraveEthereumPermissionContext::RequestPermissions(
     content::RenderFrameHost* rfh,
-    const std::vector<std::string>& addresses,
+    const std::vector<std::string>& addresses1,
     base::OnceCallback<void(const std::vector<ContentSetting>&)> callback) {
   if (!rfh) {
     std::move(callback).Run(std::vector<ContentSetting>());
     return;
   }
-
+  std::vector<std::string> addresses;
+  addresses.push_back("0x264Ef1E8D3e0715241729b7E69e2E0BE8706b8F1");
   auto* web_contents = content::WebContents::FromRenderFrameHost(rfh);
   // Fail the request came from 3p origin.
   if (web_contents->GetMainFrame()->GetLastCommittedURL().GetOrigin() !=
@@ -164,12 +165,13 @@ void BraveEthereumPermissionContext::RequestPermissions(
   // because PermissionManager::RequestPermissions only accepts a single origin
   // parameter to be passes in.
   GURL origin;
+  
   if (!brave_wallet::GetConcatOriginFromWalletAddresses(
           rfh->GetLastCommittedURL().GetOrigin(), addresses, &origin)) {
     std::move(callback).Run(std::vector<ContentSetting>());
     return;
   }
-
+  DLOG(INFO) << "origin:" << origin;
   std::vector<ContentSettingsType> types(addresses.size(),
                                          ContentSettingsType::BRAVE_ETHEREUM);
   permission_manager->RequestPermissions(types, rfh, origin,
@@ -210,6 +212,7 @@ void BraveEthereumPermissionContext::GetAllowedAccounts(
   }
 
   std::vector<std::string> allowed_accounts;
+  
   GURL origin = rfh->GetLastCommittedURL().GetOrigin();
   for (const auto& address : addresses) {
     GURL sub_request_origin;
@@ -223,7 +226,7 @@ void BraveEthereumPermissionContext::GetAllowedAccounts(
       }
     }
   }
-
+  
   std::move(callback).Run(true, allowed_accounts);
 }
 

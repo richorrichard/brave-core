@@ -164,13 +164,6 @@ handler.on(PanelActions.signMessage.getType(), async (store, payload: SignMessag
   apiProxy.showUI()
 })
 
-handler.on(PanelActions.signMessageProcessed.getType(), async (store, payload: SignMessageProcessedPayload) => {
-  const apiProxy = await getAPIProxy()
-  const braveWalletService = apiProxy.braveWalletService
-  braveWalletService.notifySignMessageRequestProcessed(payload.approved, payload.id)
-  apiProxy.closeUI()
-})
-
 handler.on(PanelActions.showApproveTransaction.getType(), async (store) => {
   store.dispatch(PanelActions.navigateTo('approveTransaction'))
 })

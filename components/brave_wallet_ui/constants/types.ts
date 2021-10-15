@@ -579,6 +579,10 @@ export interface MakeERC721TransferFromDataReturnInfo {
   data: number[]
 }
 
+export interface SignMessageHardwarePayload {
+  fromAddress: string
+}
+
 export interface TransactionInfo {
   id: string
   fromAddress: string
@@ -735,6 +739,11 @@ export interface GetPendingSignMessageRequestReturnInfo {
   id: number
   address: string
   message: string
+}
+
+export type SignMessageProcessedPayload = {
+  approved: boolean,
+  id: number
 }
 
 export interface BraveWalletService {

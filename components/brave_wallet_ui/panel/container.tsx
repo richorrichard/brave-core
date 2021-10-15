@@ -269,6 +269,7 @@ function Container (props: Props) {
     })
   }
   const primaryAction = () => {
+    console.log(readyToConnect)
     if (!readyToConnect) {
       setReadyToConnect(true)
     } else {
@@ -354,6 +355,7 @@ function Container (props: Props) {
   }
 
   const onSignData = () => {
+    
     props.walletPanelActions.signMessageProcessed({
       approved: true,
       id: signMessageData.id
@@ -588,9 +590,7 @@ function Container (props: Props) {
   }
 
   if (selectedPanel === 'connectWithSite') {
-    const accountsToConnect = props.wallet.accounts.filter(
-      (account) => props.panel.connectingAccounts.includes(account.address.toLowerCase())
-    )
+    const accountsToConnect = props.wallet.accounts
     return (
       <PanelWrapper isLonger={true}>
         <ConnectWithSiteWrapper>

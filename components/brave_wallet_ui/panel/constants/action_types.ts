@@ -30,8 +30,3 @@ export type SignMessagePayload = {
   address: string,
   message: string
 }
-
-export type SignMessageProcessedPayload = {
-  approved: boolean,
-  id: number
-}

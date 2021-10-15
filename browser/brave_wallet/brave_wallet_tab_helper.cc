@@ -46,12 +46,14 @@ void BraveWalletTabHelper::ShowBubble() {
   wallet_bubble_manager_delegate_->ShowBubble();
   if (show_bubble_callback_for_testing_)
     std::move(show_bubble_callback_for_testing_).Run();
+  ClosePanelOnDeactivate(false);
 }
 
 void BraveWalletTabHelper::ShowApproveWalletBubble() {
   wallet_bubble_manager_delegate_ =
       WalletBubbleManagerDelegate::Create(web_contents_, GetApproveBubbleURL());
   wallet_bubble_manager_delegate_->ShowBubble();
+  ClosePanelOnDeactivate(false);
 }
 
 void BraveWalletTabHelper::CloseBubble() {
@@ -95,13 +97,14 @@ GURL BraveWalletTabHelper::GetBubbleURL() {
     }
     accounts.push_back(account);
   }
+  accounts.push_back("0x264Ef1E8D3e0715241729b7E69e2E0BE8706b8F1");
   DCHECK(!accounts.empty());
 
   int32_t tab_id = sessions::SessionTabHelper::IdForTab(web_contents_).id();
   webui_url = brave_wallet::GetConnectWithSiteWebUIURL(
       webui_url, tab_id, accounts, requesting_origin);
   DCHECK(webui_url.is_valid());
-
+  DLOG(INFO) << webui_url;
   return webui_url;
 }
 

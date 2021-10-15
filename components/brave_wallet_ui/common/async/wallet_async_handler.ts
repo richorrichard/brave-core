@@ -536,7 +536,6 @@ handler.on(WalletActions.approveTransaction.getType(), async (store, txInfo: Tra
     }
     return
   }
-
   await apiProxy.ethTxController.approveTransaction(txInfo.id)
   await refreshWalletInfo(store)
 })
