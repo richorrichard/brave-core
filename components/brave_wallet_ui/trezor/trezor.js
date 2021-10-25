@@ -10,8 +10,8 @@ const unlock = async(responseId, source, owner) => {
         lazyLoad: false, // this param will prevent iframe injection until TrezorConnect.method will be called
         debug: true,
         manifest: {
-            email: 'developer@xyz.com',
-            appUrl: 'http://your.application.com',
+            email: 'support@brave.com',
+            appUrl: 'http://brave.com',
         }
     }).then(function(result) {
       console.log('TrezorConnect is Ready:', result)
