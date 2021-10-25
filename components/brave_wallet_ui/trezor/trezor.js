@@ -6,7 +6,7 @@ const kTrezorSignTransactionCommand = 'trezor-sign-transaction'
 const unlock = async(responseId, source, owner) => {
     console.log(owner)
     TrezorConnect.init({
-        connectSrc: 'https://localhost:8088/',
+        connectSrc: 'https://connect.trezor.io/8/',
         lazyLoad: false, // this param will prevent iframe injection until TrezorConnect.method will be called
         debug: true,
         manifest: {

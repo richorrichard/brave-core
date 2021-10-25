@@ -26,7 +26,7 @@ UntrustedTrezorUI::UntrustedTrezorUI(content::WebUI* web_ui)
       std::string("script-src 'self' https://connect.trezor.io/;"));
   untrusted_source->OverrideContentSecurityPolicy(
       network::mojom::CSPDirectiveName::FrameSrc,
-      std::string("frame-src https://localhost:8088/;"));
+      std::string("frame-src https://connect.trezor.io/;"));
   untrusted_source->OverrideContentSecurityPolicy(
       network::mojom::CSPDirectiveName::StyleSrc,
       std::string("style-src 'unsafe-inline';"));
