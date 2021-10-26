@@ -13,6 +13,7 @@
 #include "brave/browser/net/url_context.h"
 #include "brave/common/network_constants.h"
 #include "net/base/net_errors.h"
+#include "net/url_request/url_request_job.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 using brave::ResponseCallback;
@@ -98,6 +99,17 @@ TEST(BraveSiteHacksNetworkDelegateHelperTest,
     EXPECT_TRUE(brave_request_info->new_url_spec.empty());
     EXPECT_EQ(brave_request_info->referrer, original_referrer);
   }
+}
+
+TEST(BraveSiteHacksNetworkDelegateHelperTest, OnionReferrerStripped) {
+  const GURL original_referrer(
+      "https://"
+      "brave4u7jddbv7cyviptqjc7jusxh72uik7zt6adtckl5f4nwy2v72qd.onion/");
+  const GURL destination("https://brave.com");
+
+  auto url = net::URLRequestJob::ComputeReferrerForPolicy(
+      net::ReferrerPolicy::NEVER_CLEAR, original_referrer, destination);
+  EXPECT_EQ(url, GURL());
 }
 
 TEST(BraveSiteHacksNetworkDelegateHelperTest, QueryStringUntouched) {

@@ -535,6 +535,14 @@ IN_PROC_BROWSER_TEST_F(BraveContentBrowserClientReferrerTest,
                               &referrer);
   EXPECT_EQ(referrer->url, kExtensionUrl);
 
+  // Special rule for Onion services.
+  const GURL kOnionUrl("http://lwkjglkejslkgjel.onion/index.html");
+  referrer = kReferrer.Clone();
+  referrer->url = kOnionUrl;
+  client()->MaybeHideReferrer(browser()->profile(), kRequestUrl, kOnionUrl,
+                              &referrer);
+  EXPECT_EQ(referrer->url, GURL());
+
   // Allow referrers for certain URL.
   content_settings()->SetContentSettingCustomScope(
       ContentSettingsPattern::FromString(kDocumentUrl.GetOrigin().spec() + "*"),
