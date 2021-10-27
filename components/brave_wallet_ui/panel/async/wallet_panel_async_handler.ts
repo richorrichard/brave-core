@@ -13,7 +13,10 @@ import {
   WalletState,
   TransactionStatus,
   SignMessageData,
-  SwitchChainRequest
+  SwitchChainRequest,
+  kLedgerHardwareVendor,
+  kTrezorHardwareVendor,
+  TransactionInfo
 } from '../../constants/types'
 import {
   AccountPayloadType,
@@ -26,12 +29,15 @@ import {
   SwitchEthereumChainProcessedPayload
 } from '../constants/action_types'
 import {
-  findHardwareAccountInfo
+  findHardwareAccountInfo,
+  signTrezorTransaction,
+  signLedgerTransaction
 } from '../../common/async/lib'
 
 import { fetchSwapQuoteFactory } from '../../common/async/handlers'
 import { Store } from '../../common/async/types'
 import { getLocale } from '../../../common/locale'
+
 const handler = new AsyncActionHandler()
 
 async function getAPIProxy () {
@@ -134,6 +140,22 @@ handler.on(PanelActions.cancelConnectToSite.getType(), async (store: Store, payl
   const apiProxy = await getAPIProxy()
   apiProxy.cancelConnectToSite(payload.siteToConnectTo, state.tabId)
   apiProxy.closeUI()
+})
+
+handler.on(PanelActions.approveHardwareTransaction.getType(), async (store: Store, txInfo: TransactionInfo) => {
+  const hardwareAccount = await findHardwareAccountInfo(txInfo.fromAddress)
+  if (!hardwareAccount || !hardwareAccount.hardware) {
+    return
+  }
+  const apiProxy = await getAPIProxy()
+  apiProxy.closePanelOnDeactivate(false)
+  if (hardwareAccount.hardware.vendor === kLedgerHardwareVendor) {
+    await signLedgerTransaction(apiProxy, hardwareAccount.hardware.path, txInfo)
+  } else if (hardwareAccount.hardware.vendor === kTrezorHardwareVendor) {
+    await signTrezorTransaction(apiProxy, hardwareAccount.hardware.path, txInfo)
+  }
+  apiProxy.closePanelOnDeactivate(true)
+  await refreshWalletInfo(store)
 })
 
 handler.on(PanelActions.connectToSite.getType(), async (store: Store, payload: AccountPayloadType) => {
@@ -318,7 +340,8 @@ handler.on(WalletActions.transactionStatusChanged.getType(), async (store: Store
     [TransactionStatus.Submitted, TransactionStatus.Rejected, TransactionStatus.Approved]
       .includes(payload.txInfo.txStatus)
   ) {
-    if (state.selectedPanel === 'approveTransaction' && walletState.pendingTransactions.length === 0) {
+    const hardware = await findHardwareAccountInfo(payload.txInfo.fromAddress)
+    if (!hardware && state.selectedPanel === 'approveTransaction' && walletState.pendingTransactions.length === 0) {
       const apiProxy = await getAPIProxy()
       apiProxy.closeUI()
     }

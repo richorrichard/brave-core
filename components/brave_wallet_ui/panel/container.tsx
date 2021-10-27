@@ -62,7 +62,7 @@ import {
   findUnstoppableDomainAddress,
   getERC20Allowance
 } from '../common/async/lib'
-
+import { isHardwareAccount } from '../utils/address-utils'
 import { useAssets, useBalance, useSwap, useSend, useTimeout, usePreset } from '../common/hooks'
 
 type Props = {
@@ -358,17 +358,8 @@ function Container (props: Props) {
     props.walletPanelActions.navigateTo('main')
   }
 
-  const isHardwareAccount = (address: string) => {
-    for (const account of accounts) {
-      if (account.deviceId && account.address === address) {
-        return true
-      }
-    }
-    return false
-  }
-
   const onCancelSigning = () => {
-    if (isHardwareAccount(signMessageData[0].address)) {
+    if (isHardwareAccount(accounts, signMessageData[0].address)) {
       props.walletPanelActions.signMessageHardwareProcessed({
         success: false,
         id: signMessageData[0].id,
@@ -384,7 +375,7 @@ function Container (props: Props) {
   }
 
   const onSignData = () => {
-    if (isHardwareAccount(signMessageData[0].address)) {
+    if (isHardwareAccount(accounts, signMessageData[0].address)) {
       props.walletPanelActions.signMessageHardware(signMessageData[0])
     } else {
       props.walletPanelActions.signMessageProcessed({
@@ -429,9 +420,13 @@ function Container (props: Props) {
   const onQueueNextTransction = () => {
     props.walletActions.queueNextTransaction()
   }
-
   const onConfirmTransaction = () => {
-    if (selectedPendingTransaction) {
+    if (!selectedPendingTransaction) {
+      return
+    }
+    if (isHardwareAccount(accounts, selectedPendingTransaction.fromAddress)) {
+      props.walletPanelActions.approveHardwareTransaction(selectedPendingTransaction)
+    } else {
       props.walletActions.approveTransaction(selectedPendingTransaction)
     }
   }
