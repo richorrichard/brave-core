@@ -327,5 +327,6 @@
     <message name="IDS_BRAVE_WALLET_IMPORT_INTERNAL_ERROR" desc="Importer error message">Internal error</message>
     <message name="IDS_BRAVE_WALLET_HARDWARE_CREATE_BRIDGE_ERROR" desc="Hardware wallet error when access Trezor bridge">Internal error, unable to create iframe bridget</message>
     <message name="IDS_BRAVE_WALLET_HARDWARE_ACCOUNTS_IMPORT_ERROR" desc="Hardware wallet error when importing accounts from Trezor device">Internal error, Unable to fetch accounts</message>
+    <message name="IDS_BRAVE_WALLET_HARDWARE_PROCESS_TRANSACTION_ERROR" desc="Process transaction error when signing transactions with hardware device">Error processing the transaction</message>
   </if>
 </grit-part>

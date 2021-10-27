@@ -5,17 +5,20 @@
 /* global window */
 
 const { EventEmitter } = require('events')
+import { Transaction } from 'ethereumjs-tx'
 import {
   TrezorDerivationPaths, TrezorBridgeAccountsPayload
 } from '../../components/desktop/popup-modals/add-account-modal/hardware-wallet-connect/types'
 
 import {
-  kTrezorHardwareVendor
+  kTrezorHardwareVendor,
+  TransactionInfo
 } from '../../constants/types'
 
 import {
   kTrezorUnlockCommand,
   kTrezorGetAccountsCommand,
+  kTrezorSignTransactionCommand,
   kTrezorBridgeFrameId,
   kTrezorBridgeUrl
 } from '../../common/trezor/constants'
@@ -51,6 +54,36 @@ export default class TrezorBridgeKeyring extends EventEmitter {
     })
   }
 
+  signTransaction = async (path: string, txInfo: TransactionInfo, chainId: string) => {
+    return new Promise(async (resolve, reject) => {
+
+      const payload = this._prepareTransactionPayload(path, txInfo, chainId)
+
+      if (!this.isUnlocked() && !(await this.unlock())) {
+        return reject(new Error(getLocale('braveWalletUnlockError')))
+      }
+      const bridge = this._getBridge() as HTMLIFrameElement
+      if (!bridge || !bridge.contentWindow) {
+        return reject(new Error(getLocale('braveWalletCreateBridgeError')))
+      }
+      const kSignTransactionEvent = {
+        command: kTrezorSignTransactionCommand,
+        id: new Date().getTime(),
+        owner: window.origin,
+        payload: payload
+      }
+
+      this.addEventListener(kSignTransactionEvent.id, (data: any) => {
+        if (data.payload.success) {
+          resolve(data.payload.payload)
+        } else {
+          reject(data.payload.payload)
+        }
+      })
+      bridge.contentWindow.postMessage(kSignTransactionEvent, kTrezorBridgeUrl)
+    })
+  }
+
   isUnlocked = () => {
     return this.unlocked_
   }
@@ -63,7 +96,7 @@ export default class TrezorBridgeKeyring extends EventEmitter {
       }
       const kUnlockEvent = { command: kTrezorUnlockCommand, id: new Date().getTime(), owner: window.origin }
       if (!bridge.contentWindow) {
-        throw Error(getLocale('braveWalletCreateBridgeError'))
+        return reject(new Error(getLocale('braveWalletCreateBridgeError')))
       }
       this.addEventListener(kUnlockEvent.id, (data: any) => {
         this.unlocked_ = data.result
@@ -120,6 +153,32 @@ export default class TrezorBridgeKeyring extends EventEmitter {
     const callback = this.pending_requests_[event.data.id] as Function
     callback.call(this, event.data)
     this.removeEventListener(event.data.id)
+  }
+  _normalize (buf: any) {
+    return ethUtil.bufferToHex(buf).toString()
+  }
+  _prepareTransactionPayload = (path: string, txInfo: TransactionInfo, chainId: string) => {
+    const txParams = {
+      nonce: txInfo.txData.baseData.nonce,
+      gasPrice: txInfo.txData.baseData.gasPrice,
+      gasLimit: txInfo.txData.baseData.gasLimit,
+      to: txInfo.txData.baseData.to,
+      value: txInfo.txData.baseData.value,
+      data: Buffer.from(txInfo.txData.baseData.data)
+    }
+    const tx = new Transaction(txParams)
+    return {
+      path: path,
+      transaction: {
+        to: this._normalize(tx.to),
+        value: this._normalize(tx.value),
+        data: this._normalize(tx.data).replace('0x', ''),
+        chainId: parseInt(chainId, 16),
+        nonce: this._normalize(tx.nonce),
+        gasLimit: this._normalize(tx.gasLimit),
+        gasPrice: this._normalize(tx.gasPrice)
+      }
+    }
   }
 
   _getBridge = () => {

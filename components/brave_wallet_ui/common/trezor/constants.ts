@@ -5,6 +5,7 @@
 
 export const kTrezorUnlockCommand = 'trezor-unlock'
 export const kTrezorGetAccountsCommand = 'trezor-get-accounts'
+export const kTrezorSignTransactionCommand = 'trezor-sign-transaction'
 export const kTrezorBridgeFrameId = 'trezor-untrusted-frame'
 export const kTrezorBridgeUrl = 'chrome-untrusted://trezor-bridge'
-export const kTrezorBridgeOwner = 'chrome://wallet'
+export const kTrezorBridgeOwners = ['chrome://wallet', 'chrome://wallet-panel.top-chrome']

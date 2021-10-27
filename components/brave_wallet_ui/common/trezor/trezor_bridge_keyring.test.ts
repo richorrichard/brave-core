@@ -182,13 +182,13 @@ test('Extract accounts from locked device', () => {
   .rejects.toStrictEqual(false)
 })
 
-test('Extracting accounts from unlocked device fail to access bridge', () => {
+test('Extract accounts from unlocked device fail to access bridge', () => {
   const hardwareKeyring = createTrezorKeyring(true, { success: true, payload: [] })
   return expect(hardwareKeyring.getAccounts(-2, 1, TrezorDerivationPaths.Default))
     .rejects.toStrictEqual(new Error(getLocale('braveWalletCreateBridgeError')))
 })
 
-test('Extracting accounts from unlocked device returned fail', () => {
+test('Extract accounts from unlocked device returned fail', () => {
   const hardwareKeyring = createTrezorKeyring(true, { success: false, payload: [] })
   hardwareKeyring._getBridge = () => {
     return hardwareKeyring as any
@@ -197,7 +197,7 @@ test('Extracting accounts from unlocked device returned fail', () => {
     .rejects.toStrictEqual({ success: false, error: getLocale('braveWalletImportingAccountsError') })
 })
 
-test('Extracting accounts from unlocked device returned success', () => {
+test('Extract accounts from unlocked device returned success', () => {
   const accounts = [
     {
       publicKey: '3a443d8381a6798a70c6ff9304bdc8cb0163c23211d11628fae52ef9e0dca11a001cf066d56a8156fc201cd5df8a36ef694eecd258903fca7086c1fae7441e1d',

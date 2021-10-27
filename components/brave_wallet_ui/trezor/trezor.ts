@@ -2,7 +2,8 @@ import TrezorConnect from 'trezor-connect'
 import {
   kTrezorUnlockCommand,
   kTrezorGetAccountsCommand,
-  kTrezorBridgeOwner
+  kTrezorBridgeOwners,
+  kTrezorSignTransactionCommand
 } from '../common/trezor/constants'
 
 const unlock = async (responseId: string, source: any, owner: any) => {
@@ -28,9 +29,17 @@ const getAccounts = async (responseId: string, source: any, requestedPaths: any,
   })
 }
 
+const signTransaction = async (responseId: string, source: any, owner: any, payload: any) => {
+  TrezorConnect.ethereumSignTransaction(payload).then((result) => {
+    source.postMessage({ id: responseId, command: kTrezorSignTransactionCommand, payload: result }, owner)
+  }).catch((error) => {
+    source.postMessage({ id: responseId, command: kTrezorSignTransactionCommand, payload: error }, owner)
+  })
+}
+
 window.addEventListener('message', (event) => {
   if (event.origin !== event.data.owner || event.type !== 'message' ||
-      event.origin !== kTrezorBridgeOwner) {
+      event.origin in kTrezorBridgeOwners) {
     return
   }
   if (event.data.command === kTrezorUnlockCommand) {
@@ -39,5 +48,9 @@ window.addEventListener('message', (event) => {
   if (event.data.command === kTrezorGetAccountsCommand) {
     return getAccounts(event.data.id, event.source, event.data.paths, event.data.owner)
   }
+  if (event.data.command === kTrezorSignTransactionCommand) {
+    return signTransaction(event.data.id, event.source, event.data.owner, event.data.payload)
+  }
+
   return
 })
