@@ -8,9 +8,11 @@
 #include <utility>
 
 #include "base/check.h"
+#include "bat/ads/internal/account/confirmations/confirmations_state.h"
 #include "bat/ads/internal/privacy/challenge_bypass_ristretto_util.h"
 #include "bat/ads/internal/privacy/tokens/token_generator.h"
 #include "bat/ads/internal/privacy/unblinded_tokens/unblinded_token_info.h"
+#include "bat/ads/internal/privacy/unblinded_tokens/unblinded_tokens.h"
 #include "wrapper.hpp"
 
 namespace ads {
@@ -18,6 +20,15 @@ namespace privacy {
 
 using challenge_bypass_ristretto::PublicKey;
 using challenge_bypass_ristretto::UnblindedToken;
+
+UnblindedTokenList SetUnblindedTokens(const int count) {
+  const UnblindedTokenList& unblinded_tokens = GetUnblindedTokens(count);
+
+  ConfirmationsState::Get()->get_unblinded_tokens()->SetTokens(
+      unblinded_tokens);
+
+  return unblinded_tokens;
+}
 
 UnblindedTokenInfo CreateUnblindedToken(
     const std::string& unblinded_token_base64) {
@@ -29,6 +40,10 @@ UnblindedTokenInfo CreateUnblindedToken(
   unblinded_token.public_key =
       PublicKey::decode_base64("RJ2i/o/pZkrH+i0aGEMY1G9FXtd7Q7gfRi3YdNRnDDk=");
   DCHECK(!ExceptionOccurred());
+
+  unblinded_token.confirmation_type = ConfirmationType::kUndefined;
+
+  unblinded_token.ad_type = AdType::kUndefined;
 
   return unblinded_token;
 }
@@ -67,7 +82,7 @@ UnblindedTokenList GetUnblindedTokens(const int count) {
   for (int i = 0; i < count; i++) {
     const std::string unblinded_token_base64 =
         unblinded_tokens_base64.at(i % modulo);
-    const UnblindedTokenInfo unblinded_token =
+    const UnblindedTokenInfo& unblinded_token =
         CreateUnblindedToken(unblinded_token_base64);
 
     unblinded_tokens.push_back(unblinded_token);
@@ -83,7 +98,7 @@ UnblindedTokenList GetRandomUnblindedTokens(const int count) {
   const std::vector<Token> tokens = token_generator.Generate(count);
   for (const auto& token : tokens) {
     const std::string token_base64 = token.encode_base64();
-    const UnblindedTokenInfo unblinded_token =
+    const UnblindedTokenInfo& unblinded_token =
         CreateUnblindedToken(token_base64);
 
     unblinded_tokens.push_back(unblinded_token);
@@ -95,7 +110,7 @@ UnblindedTokenList GetRandomUnblindedTokens(const int count) {
 base::Value GetUnblindedTokensAsList(const int count) {
   base::Value list(base::Value::Type::LIST);
 
-  const UnblindedTokenList unblinded_tokens = GetUnblindedTokens(count);
+  const UnblindedTokenList& unblinded_tokens = GetUnblindedTokens(count);
 
   for (const auto& unblinded_token : unblinded_tokens) {
     base::Value dictionary(base::Value::Type::DICTIONARY);

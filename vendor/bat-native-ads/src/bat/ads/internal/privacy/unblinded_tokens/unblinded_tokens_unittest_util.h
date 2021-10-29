@@ -17,6 +17,8 @@ namespace privacy {
 
 struct UnblindedTokenInfo;
 
+UnblindedTokenList SetUnblindedTokens(const int count);
+
 UnblindedTokenInfo CreateUnblindedToken(
     const std::string& unblinded_token_base64);
 

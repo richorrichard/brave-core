@@ -28,7 +28,7 @@ class RedeemUnblindedPaymentTokensDelegateMock
 
   MOCK_METHOD(void,
               OnDidRedeemUnblindedPaymentTokens,
-              (const privacy::UnblindedTokenList unblinded_tokens));
+              (const privacy::UnblindedTokenList& unblinded_tokens));
   MOCK_METHOD(void, OnFailedToRedeemUnblindedPaymentTokens, ());
 
   MOCK_METHOD(void,
