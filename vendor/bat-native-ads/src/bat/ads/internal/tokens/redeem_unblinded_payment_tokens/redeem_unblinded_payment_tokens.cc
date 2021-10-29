@@ -65,7 +65,7 @@ void RedeemUnblindedPaymentTokens::MaybeRedeemAfterDelay(
 
   const base::TimeDelta delay = CalculateTokenRedemptionDelay();
 
-  const base::Time time =
+  const base::Time& time =
       timer_.Start(delay, base::BindOnce(&RedeemUnblindedPaymentTokens::Redeem,
                                          base::Unretained(this)));
 
@@ -86,11 +86,11 @@ void RedeemUnblindedPaymentTokens::Redeem() {
     return;
   }
 
-  BLOG(2, "PUT /v1/confirmation/payment/{payment_id}");
+  BLOG(2, "PUT /v2/confirmation/payment/{payment_id}");
 
   is_processing_ = true;
 
-  const privacy::UnblindedTokenList unblinded_tokens =
+  const privacy::UnblindedTokenList& unblinded_tokens =
       ConfirmationsState::Get()->get_unblinded_payment_tokens()->GetAllTokens();
 
   RedeemUnblindedPaymentTokensUrlRequestBuilder url_request_builder(
@@ -106,7 +106,7 @@ void RedeemUnblindedPaymentTokens::Redeem() {
 
 void RedeemUnblindedPaymentTokens::OnRedeem(
     const mojom::UrlResponse& url_response,
-    const privacy::UnblindedTokenList unblinded_tokens) {
+    const privacy::UnblindedTokenList& unblinded_tokens) {
   BLOG(1, "OnRedeemUnblindedPaymentTokens");
 
   BLOG(6, UrlResponseToString(url_response));
@@ -122,7 +122,7 @@ void RedeemUnblindedPaymentTokens::OnRedeem(
 }
 
 void RedeemUnblindedPaymentTokens::OnDidRedeemUnblindedPaymentTokens(
-    const privacy::UnblindedTokenList unblinded_tokens) {
+    const privacy::UnblindedTokenList& unblinded_tokens) {
   is_processing_ = false;
 
   retry_timer_.Stop();
@@ -147,7 +147,7 @@ void RedeemUnblindedPaymentTokens::OnFailedToRedeemUnblindedPaymentTokens() {
 }
 
 void RedeemUnblindedPaymentTokens::ScheduleNextTokenRedemption() {
-  const base::Time next_token_redemption_date =
+  const base::Time& next_token_redemption_date =
       CalculateNextTokenRedemptionDate();
 
   ConfirmationsState::Get()->SetNextTokenRedemptionDate(
@@ -167,7 +167,7 @@ void RedeemUnblindedPaymentTokens::Retry() {
     delegate_->OnWillRetryRedeemingUnblindedPaymentTokens();
   }
 
-  const base::Time time = retry_timer_.StartWithPrivacy(
+  const base::Time& time = retry_timer_.StartWithPrivacy(
       base::TimeDelta::FromSeconds(kRetryAfterSeconds),
       base::BindOnce(&RedeemUnblindedPaymentTokens::OnRetry,
                      base::Unretained(this)));
@@ -198,7 +198,7 @@ base::TimeDelta RedeemUnblindedPaymentTokens::CalculateTokenRedemptionDelay() {
     ConfirmationsState::Get()->Save();
   }
 
-  const base::Time now = base::Time::Now();
+  const base::Time& now = base::Time::Now();
 
   base::TimeDelta delay;
   if (now >= next_token_redemption_date) {
@@ -213,7 +213,7 @@ base::TimeDelta RedeemUnblindedPaymentTokens::CalculateTokenRedemptionDelay() {
 }
 
 base::Time RedeemUnblindedPaymentTokens::CalculateNextTokenRedemptionDate() {
-  const base::Time now = base::Time::Now();
+  const base::Time& now = base::Time::Now();
 
   int64_t delay;
 

@@ -20,7 +20,7 @@ class RedeemUnblindedPaymentTokensDelegate {
 
   // Invoked to tell the delegate unblinded payment tokens were redeemed
   virtual void OnDidRedeemUnblindedPaymentTokens(
-      const privacy::UnblindedTokenList unblinded_tokens) {}
+      const privacy::UnblindedTokenList& unblinded_tokens) {}
 
   // Invoked to tell the delegate unblinded payment token redemption failed
   virtual void OnFailedToRedeemUnblindedPaymentTokens() {}
