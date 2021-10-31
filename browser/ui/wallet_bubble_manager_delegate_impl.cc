@@ -6,15 +6,16 @@
 #include "brave/browser/ui/wallet_bubble_manager_delegate_impl.h"
 
 #include <utility>
+#include <vector>
 
 #include "base/callback.h"
 #include "brave/browser/ui/views/frame/brave_browser_view.h"
+#include "chrome/browser/extensions/extension_tab_util.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_finder.h"
 #include "chrome/browser/ui/browser_list.h"
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
 #include "components/grit/brave_components_strings.h"
-#include "components/sessions/content/session_tab_helper.h"
 #include "content/public/browser/web_contents.h"
 #include "ui/views/view.h"
 #include "ui/views/widget/widget.h"
@@ -27,20 +28,6 @@ content::WebContents* GetActiveWebContents() {
       ->GetLastActive()
       ->tab_strip_model()
       ->GetActiveWebContents();
-}
-
-content::WebContents* GetWebContentsFromTabId(int32_t tab_id) {
-  for (auto* browser : *BrowserList::GetInstance()) {
-    TabStripModel* tab_strip_model = browser->tab_strip_model();
-    for (int index = 0; index < tab_strip_model->count(); ++index) {
-      content::WebContents* contents = tab_strip_model->GetWebContentsAt(index);
-      if (sessions::SessionTabHelper::IdForTab(contents).id() == tab_id) {
-        return contents;
-      }
-    }
-  }
-
-  return nullptr;
 }
 
 }  // namespace
@@ -92,18 +79,26 @@ class BraveWebUIBubbleManagerT : public WebUIBubbleManagerT<T> {
     auto contents_wrapper = WebUIBubbleManagerT<T>::cached_contents_wrapper();
     if (!contents_wrapper)
       return;
-    for (auto it : contents_wrapper->GetPopupIds()) {
-      auto* popup_contents = GetWebContentsFromTabId(it);
-      if (!popup_contents)
-        continue;
-      auto* popup_browser = chrome::FindBrowserWithWebContents(popup_contents);
-      if (!popup_browser)
+    for (auto tab_id : contents_wrapper->GetPopupIds()) {
+      content::WebContents* popup_contents = nullptr;
+      Browser* popup_browser = nullptr;
+      extensions::ExtensionTabUtil::GetTabById(
+          tab_id, browser_->profile(), /* include_incognito = */ false,
+          /* source_browser =*/&popup_browser, /* tab_strip = */ nullptr,
+          /* contents = */ &popup_contents, /* source_index = */ nullptr);
+      if (!popup_contents || !popup_browser)
         continue;
       auto delegate = popup_browser->GetDelegateWeakPtr();
       if (!delegate)
         continue;
       delegate->CloseContents(popup_contents);
     }
+    contents_wrapper->GetPopupIds().clear();
+  }
+
+  const std::vector<int32_t>& GetPopupIdsForTesting() {
+    auto contents_wrapper = WebUIBubbleManagerT<T>::cached_contents_wrapper();
+    return contents_wrapper->GetPopupIds();
   }
 
   void OnWidgetDestroying(views::Widget* widget) override {
@@ -173,6 +168,11 @@ void WalletBubbleManagerDelegateImpl::CloseOnDeactivate(bool close) {
 content::WebContents*
 WalletBubbleManagerDelegateImpl::GetWebContentsForTesting() {
   return webui_bubble_manager_->GetWebContentsForTesting();
+}
+
+const std::vector<int32_t>&
+WalletBubbleManagerDelegateImpl::GetPopupIdsForTesting() {
+  return webui_bubble_manager_->GetPopupIdsForTesting();
 }
 void WalletBubbleManagerDelegateImpl::CloseBubble() {
   webui_bubble_manager_->CloseBubble();

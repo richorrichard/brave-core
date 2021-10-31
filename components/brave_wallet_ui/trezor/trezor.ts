@@ -51,6 +51,5 @@ window.addEventListener('message', (event) => {
   if (event.data.command === kTrezorSignTransactionCommand) {
     return signTransaction(event.data.id, event.source, event.data.owner, event.data.payload)
   }
-
   return
 })

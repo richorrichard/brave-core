@@ -832,10 +832,9 @@ TEST_F(EthTxControllerUnitTest, ApproveHardwareTransaction) {
 }
 
 TEST_F(EthTxControllerUnitTest, GetTransactionInfo) {
-  auto tx_data =
-      mojom::TxData::New("0x1", "0x2" /* gas_price */, "0x4" /* gas_limit */,
-                         "0xbe862ad9abfe6f22bcb087716c7d89a26051f74c",
-                         "0x16345785d8a0000", data_);
+  auto tx_data = mojom::TxData::New(
+      "0x1", "0x2" /* gas_price */, "0x4" /* gas_limit */,
+      "0xbe862ad9abfe6f22bcb087716c7d89a26051f74c", "0x16345785d8a0000", data_);
   bool callback_called = false;
   std::string tx_meta_id;
 
@@ -863,13 +862,13 @@ TEST_F(EthTxControllerUnitTest, GetTransactionInfo) {
 
   callback_called = false;
   eth_tx_controller_->GetTransactionInfo(
-      std::string(), base::BindLambdaForTesting([&](mojom::TransactionInfoPtr tx) {
+      std::string(),
+      base::BindLambdaForTesting([&](mojom::TransactionInfoPtr tx) {
         ASSERT_TRUE(tx.is_null());
         callback_called = true;
       }));
   base::RunLoop().RunUntilIdle();
   EXPECT_TRUE(callback_called);
-
 }
 
 TEST_F(EthTxControllerUnitTest, ApproveHardwareTransaction1559) {

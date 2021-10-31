@@ -24,7 +24,7 @@
                       WindowOpenDisposition disposition,                  \
                       const gfx::Rect& initial_rect, bool user_gesture,   \
                       bool* was_blocked) override;                        \
-  const std::vector<int32_t>& GetPopupIds() { return popup_ids_; }        \
+  std::vector<int32_t>& GetPopupIds() { return popup_ids_; }              \
   void RenderViewHostChanged
 
 #define webui_resizes_host_        \
