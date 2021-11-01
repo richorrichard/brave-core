@@ -135,6 +135,11 @@ class SendTransactionBrowserTest : public InProcessBrowserTest {
     eth_tx_controller_->AddObserver(observer()->GetReceiver());
 
     StartRPCServer(base::BindRepeating(&HandleRequest));
+
+    ASSERT_TRUE(base::HexStringToBytes(
+        "095ea7b3000000000000000000000000BFb30a082f650C2A15D0632f0e87bE4F8e6446"
+        "0f0000000000000000000000000000000000000000000000003fffffffffffffff",
+        &data_));
   }
 
   void StartRPCServer(
@@ -174,6 +179,39 @@ class SendTransactionBrowserTest : public InProcessBrowserTest {
         }));
     run_loop.Run();
   }
+
+  bool SetSelectedAccount(const std::string& account) {
+    bool success = false;
+    base::RunLoop run_loop;
+    keyring_controller_->SetSelectedAccount(account,
+                                   base::BindLambdaForTesting([&](bool v) {
+                                     success = v;
+                                     run_loop.Quit();
+                                   }));
+    run_loop.Run();
+    base::RunLoop().RunUntilIdle();
+    return success;
+  }
+
+  bool Unlock(const std::string& password) {
+    bool success = false;
+    base::RunLoop run_loop;
+    keyring_controller_->Unlock(password, base::BindLambdaForTesting([&](bool v) {
+                         success = v;
+                         run_loop.Quit();
+                       }));
+    run_loop.Run();
+    return success;
+  }
+
+  void AddHardwareAccount(const std::string& address) {
+    std::vector<mojom::HardwareWalletAccountPtr> hw_accounts;
+    hw_accounts.push_back(mojom::HardwareWalletAccount::New(
+        address, "m/44'/60'/1'/0/0", "name 1", "Ledger", "device1"));
+
+    keyring_controller_->AddHardwareAccounts(std::move(hw_accounts));
+  }
+
   void UserGrantPermission(bool granted) {
     if (granted)
       permissions::BraveEthereumPermissionContext::AcceptOrCancel(
@@ -186,7 +224,7 @@ class SendTransactionBrowserTest : public InProcessBrowserTest {
               granted);
   }
 
-  std::string from() { return "0x084DCb94038af1715963F149079cE011C4B22961"; }
+  static std::string from() { return "0x084DCb94038af1715963F149079cE011C4B22961"; }
 
   void ApproveTransaction(const std::string& tx_meta_id) {
     base::RunLoop run_loop;
@@ -196,6 +234,19 @@ class SendTransactionBrowserTest : public InProcessBrowserTest {
           observer()->WaitForApprovedStatus();
           run_loop.Quit();
         }));
+    run_loop.Run();
+  }
+
+  void ApproveHardwareTransaction(const std::string& tx_meta_id) {
+    base::RunLoop run_loop;
+    eth_tx_controller_->ApproveHardwareTransaction(
+      tx_meta_id, base::BindLambdaForTesting([&](bool success) {
+        EXPECT_TRUE(success);
+        auto tx_meta = eth_tx_controller_->GetTxForTesting(tx_meta_id);
+        EXPECT_TRUE(tx_meta);
+        EXPECT_EQ(tx_meta->status, mojom::TransactionStatus::Approved);
+        run_loop.Quit();
+      }));
     run_loop.Run();
   }
 
@@ -220,7 +271,6 @@ class SendTransactionBrowserTest : public InProcessBrowserTest {
     EXPECT_TRUE(
         brave_wallet::BraveWalletTabHelper::FromWebContents(web_contents())
             ->IsShowingBubble());
-    UserGrantPermission(true);
     ASSERT_TRUE(
         ExecJs(web_contents(),
                base::StringPrintf(
@@ -303,11 +353,13 @@ class SendTransactionBrowserTest : public InProcessBrowserTest {
                   IDS_WALLET_ETH_SEND_TRANSACTION_USER_REJECTED));
   }
 
-  std::vector<mojom::TransactionInfoPtr> GetAllTransactionInfo() {
+  std::vector<mojom::TransactionInfoPtr> GetAllTransactionInfo(
+    const std::string& address = from()
+  ) {
     std::vector<mojom::TransactionInfoPtr> transaction_infos;
     base::RunLoop run_loop;
     eth_tx_controller_->GetAllTransactionInfo(
-        from(), base::BindLambdaForTesting(
+        address, base::BindLambdaForTesting(
                     [&](std::vector<mojom::TransactionInfoPtr> v) {
                       transaction_infos = std::move(v);
                       run_loop.Quit();
@@ -327,6 +379,7 @@ class SendTransactionBrowserTest : public InProcessBrowserTest {
   KeyringController* keyring_controller_;
   EthTxController* eth_tx_controller_;
   EthJsonRpcController* eth_json_rpc_controller_;
+  std::vector<uint8_t> data_;
 };
 
 IN_PROC_BROWSER_TEST_F(SendTransactionBrowserTest, UserApprovedRequest) {
@@ -413,6 +466,58 @@ IN_PROC_BROWSER_TEST_F(SendTransactionBrowserTest, NoEthPermission) {
                 .ExtractString(),
             l10n_util::GetStringUTF8(
                 IDS_WALLET_ETH_SEND_TRANSACTION_FROM_NOT_AUTHED));
+}
+
+IN_PROC_BROWSER_TEST_F(SendTransactionBrowserTest,
+                       DoNotHidePanelForHardwareTransactionApprovals) {
+  RestoreWallet();
+  std::string address = "0xbe862ad9abfe6f22bcb087716c7d89a26051f74c";
+  AddHardwareAccount(address);
+  ASSERT_TRUE(SetSelectedAccount(address));
+  ASSERT_TRUE(Unlock("brave123"));
+  GURL url =
+      https_server_for_files()->GetURL("a.com", "/send_transaction.html");
+  ASSERT_TRUE(ui_test_utils::NavigateToURL(browser(), url));
+  WaitForLoadStop(web_contents());
+  auto* tab_helper =
+    brave_wallet::BraveWalletTabHelper::FromWebContents(web_contents());
+  EXPECT_TRUE(
+      tab_helper->IsShowingBubble());
+  permissions::BraveEthereumPermissionContext::AcceptOrCancel(
+    std::vector<std::string>{address}, web_contents());
+  base::RunLoop().RunUntilIdle();
+  auto* panel_contents = tab_helper->GetBubbleWebContentsForTesting();
+  EXPECT_TRUE(content::NavigateToURL(panel_contents, tab_helper->GetApproveBubbleURL()));
+  WaitForLoadStop(panel_contents);
+  base::RunLoop().RunUntilIdle();
+  LOG(ERROR) << "GetBubbleWebContentsForTesting:" << panel_contents->GetVisibleURL();
+  std::string test_method = "sendAsync";
+  ASSERT_TRUE(
+      ExecJs(web_contents(),
+              base::StringPrintf(
+                  "sendTransaction(false, '%s', "
+                  "'%s', "
+                  "'0xbe862ad9abfe6f22bcb087716c7d89a26051f75c', '0x1');",
+                  test_method.c_str(), address.c_str())));
+  base::RunLoop().RunUntilIdle();
+  auto infos = GetAllTransactionInfo(address);
+  EXPECT_EQ(1UL, infos.size());
+  EXPECT_TRUE(
+      base::EqualsCaseInsensitiveASCII(address, infos[0]->from_address));
+  EXPECT_EQ(mojom::TransactionStatus::Unapproved, infos[0]->tx_status);
+  EXPECT_TRUE(infos[0]->tx_data->base_data->nonce.empty());
+  EXPECT_TRUE(tab_helper->IsShowingBubble());
+
+  LOG(ERROR) << "ApproveHardwareTransaction:" << infos[0]->id;
+  ApproveHardwareTransaction(infos[0]->id);
+  base::RunLoop().RunUntilIdle();
+  infos = GetAllTransactionInfo(address);
+  EXPECT_EQ(1UL, infos.size());
+  EXPECT_TRUE(
+      base::EqualsCaseInsensitiveASCII(address, infos[0]->from_address));
+  EXPECT_EQ(mojom::TransactionStatus::Approved, infos[0]->tx_status);
+  EXPECT_FALSE(infos[0]->tx_data->base_data->nonce.empty());
+  EXPECT_FALSE(tab_helper->IsShowingBubble());
 }
 
 }  // namespace brave_wallet

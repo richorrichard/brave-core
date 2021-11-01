@@ -34,6 +34,7 @@ void OnRequestEthereumPermissions(
   std::vector<std::string> granted_accounts;
   for (size_t i = 0; i < responses.size(); i++) {
     if (responses[i] == CONTENT_SETTING_ALLOW) {
+      LOG(ERROR) << "granted_accounts:" << accounts[i];
       granted_accounts.push_back(accounts[i]);
     }
   }

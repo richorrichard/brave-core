@@ -207,7 +207,7 @@ export function refreshTransactionHistory (address?: string) {
         obj[account.address] = transactionInfos
         return obj
       }), Promise.resolve({}))
-
+    console.log('refreshTransactionHistory:', accountsToUpdate)
     dispatch(WalletActions.setAccountTransactions({
       ...transactions,
       ...freshTransactions

@@ -112,6 +112,7 @@ handler.on(WalletActions.initialize.getType(), async (store) => {
   if (url.hash === '#approveTransaction') {
     // When this panel is explicitly selected we close the panel
     // UI after all transactions are approved or rejected.
+    console.log('showApproveTransaction')
     store.dispatch(PanelActions.showApproveTransaction())
     return
   }
@@ -132,14 +133,16 @@ handler.on(PanelActions.approveHardwareTransaction.getType(), async (store: Stor
   if (!hardwareAccount || !hardwareAccount.hardware) {
     return
   }
+  const apiProxy = await getAPIProxy()
   if (hardwareAccount.hardware.vendor === kLedgerHardwareVendor) {
     await signLedgerTransaction(hardwareAccount.hardware.path, txInfo)
   } else if (hardwareAccount.hardware.vendor === kTrezorHardwareVendor) {
-    const apiProxy = await getAPIProxy()
     apiProxy.closePanelOnDeactivate(false)
     await signTrezorTransaction(hardwareAccount.hardware.path, txInfo)
     apiProxy.closePanelOnDeactivate(false)
   }
+  console.log('apiProxy.closeUI')
+  apiProxy.closeUI()
   await refreshWalletInfo(store)
 })
 
@@ -285,13 +288,15 @@ handler.on(PanelActions.openWalletSettings.getType(), async (store) => {
 handler.on(WalletActions.transactionStatusChanged.getType(), async (store: Store, payload: TransactionStatusChanged) => {
   const state = getPanelState(store)
   const walletState = getWalletState(store)
+  console.log("approve:", state.selectedPanel, walletState.pendingTransactions.length)
   if (payload.txInfo.txStatus === TransactionStatus.Submitted ||
     payload.txInfo.txStatus === TransactionStatus.Rejected ||
     payload.txInfo.txStatus === TransactionStatus.Approved) {
-    const hardware = await findHardwareAccountInfo(payload.txInfo.fromAddress)
-    if (!hardware && state.selectedPanel === 'approveTransaction' && walletState.pendingTransactions.length === 0) {
+    // const hardware = await findHardwareAccountInfo(payload.txInfo.fromAddress)
+    if (/*!hardware && */state.selectedPanel === 'approveTransaction' && walletState.pendingTransactions.length === 0) {
       const apiProxy = await getAPIProxy()
       apiProxy.closeUI()
+      console.log('closed panel')
     }
   }
 })

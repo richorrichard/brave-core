@@ -302,9 +302,9 @@ reducer.on(WalletActions.unapprovedTxUpdated, (state: any, payload: UnapprovedTx
 
 reducer.on(WalletActions.transactionStatusChanged, (state: WalletState, payload: TransactionStatusChanged) => {
   if (isHardwareAccount(state.accounts, payload.txInfo.fromAddress)) {
-    return state
+//    return state
   }
-
+  console.log("approve 2:", JSON.stringify(state))
   const newPendingTransactions = state.pendingTransactions
     .filter((tx: TransactionInfo) => tx.id !== payload.txInfo.id)
     .concat(payload.txInfo.txStatus === TransactionStatus.Unapproved ? [payload.txInfo] : [])
@@ -324,7 +324,7 @@ reducer.on(WalletActions.transactionStatusChanged, (state: WalletState, payload:
         : transactions
     ]
   })
-
+  console.log()
   return {
     ...state,
     pendingTransactions: sortedTransactionList,

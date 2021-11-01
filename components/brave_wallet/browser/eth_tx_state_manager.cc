@@ -233,8 +233,10 @@ void EthTxStateManager::AddOrUpdateTx(const TxMeta& meta) {
   bool is_add = dict->FindPath(path) == nullptr;
   dict->SetPath(path, TxMetaToValue(meta));
   if (!is_add) {
-    for (auto& observer : observers_)
+    for (auto& observer : observers_) {
+      LOG(ERROR) << "OnTransactionStatusChanged";
       observer.OnTransactionStatusChanged(TxMetaToTransactionInfo(meta));
+    }
     return;
   }
 

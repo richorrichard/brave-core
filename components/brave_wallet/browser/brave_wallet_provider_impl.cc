@@ -189,7 +189,6 @@ void BraveWalletProviderImpl::ContinueAddAndApproveTransaction(
             IDS_WALLET_ETH_SEND_TRANSACTION_FROM_NOT_AUTHED));
     return;
   }
-
   tx_controller_->AddUnapprovedTransaction(
       std::move(tx_data), from,
       base::BindOnce(&BraveWalletProviderImpl::OnAddUnapprovedTransaction,
@@ -258,6 +257,7 @@ void BraveWalletProviderImpl::OnAddUnapprovedTransaction(
     bool success,
     const std::string& tx_meta_id,
     const std::string& error_message) {
+  LOG(ERROR) << "OnAddUnapprovedTransaction:" << success << " tx_meta_id:" << tx_meta_id;
   if (success) {
     add_tx_callbacks_[tx_meta_id] = std::move(callback);
     delegate_->ShowBubble();

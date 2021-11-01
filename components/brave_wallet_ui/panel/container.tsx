@@ -323,6 +323,7 @@ function Container (props: Props) {
   }
 
   const navigateTo = (path: PanelTypes) => {
+    console.log(path)
     if (path === 'expanded') {
       props.walletPanelActions.expandWallet()
     } else {
@@ -344,15 +345,18 @@ function Container (props: Props) {
 
   const onSelectAccount = (account: WalletAccountType) => () => {
     props.walletActions.selectAccount(account)
+    console.log('onSelectAccount')
     props.walletPanelActions.navigateTo('main')
   }
 
   const onSelectNetwork = (network: EthereumChain) => () => {
     props.walletActions.selectNetwork(network)
+    console.log('onSelectNetwork')
     props.walletPanelActions.navigateTo('main')
   }
 
   const onReturnToMain = () => {
+    console.log('onReturnToMain')
     props.walletPanelActions.navigateTo('main')
   }
 
@@ -398,19 +402,23 @@ function Container (props: Props) {
   }
 
   const onRejectTransaction = () => {
+    console.log('onRejectTransaction')
     if (selectedPendingTransaction) {
       props.walletActions.rejectTransaction(selectedPendingTransaction)
     }
   }
 
   const onRejectAllTransactions = () => {
+    console.log('onRejectAllTransactions')
     props.walletActions.rejectAllTransactions()
   }
 
   const onQueueNextTransction = () => {
+    console.log('queueNextTransaction')
     props.walletActions.queueNextTransaction()
   }
   const onConfirmTransaction = () => {
+    console.log('onConfirmTransaction')
     if (!selectedPendingTransaction) {
       return
     }
@@ -474,8 +482,9 @@ function Container (props: Props) {
       </PanelWrapper>
     )
   }
-
+  console.log('selectedPendingTransaction:', selectedPendingTransaction)
   if (selectedPendingTransaction) {
+    
     return (
       <PanelWrapper isLonger={true}>
         <LongWrapper>
