@@ -32,6 +32,7 @@ export const connectionFailed = createAction('connectionFailed')
 export const retryConnect = createAction('retryConnect')
 export const initialize = createAction('initialize')
 export const purchaseConfirmed = createAction('purchaseConfirmed')
+export const initUISell = createAction('initUISell')
 
 export const initUIMain = createAction<InitUIMainPayload>('initUIMain')
 export const toggleRegionSelector = createAction<ToggleRegionSelectorPayload>('toggleRegionSelector', (isSelectingRegion) => ({ isSelectingRegion }))

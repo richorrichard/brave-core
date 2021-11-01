@@ -16,7 +16,7 @@ type RootState = {
   regions?: Array<Region>
   currentRegion?: Region
   productUrls?: ProductUrls
-  currentView: ViewType
+  currentView: ViewType | null
 }
 
 const defaultState: RootState = {
@@ -25,7 +25,7 @@ const defaultState: RootState = {
   connectionStatus: ConnectionState.DISCONNECTED,
   regions: undefined,
   currentRegion: undefined,
-  currentView: ViewType.Sell
+  currentView: null
 }
 
 const reducer = createReducer<RootState>({}, defaultState)
@@ -79,6 +79,20 @@ reducer.on(Actions.retryConnect, (state): RootState => {
   return {
     ...state,
     hasError: false
+  }
+})
+
+reducer.on(Actions.purchaseConfirmed, (state): RootState => {
+  return {
+    ...state,
+    currentView: null
+  }
+})
+
+reducer.on(Actions.initUISell, (state): RootState => {
+  return {
+    ...state,
+    currentView: ViewType.Sell
   }
 })
 

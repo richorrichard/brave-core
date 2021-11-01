@@ -66,6 +66,10 @@ handler.on(Actions.purchaseConfirmed.getType(), async (store) => {
 handler.on(Actions.initialize.getType(), async (store) => {
   const { state } = await getPanelBrowserAPI().serviceHandler.getPurchasedState()
 
+  if (state === PurchasedState.NOT_PURCHASED) {
+    store.dispatch(Actions.initUISell())
+  }
+
   if (state === PurchasedState.PURCHASED) {
     store.dispatch(Actions.purchaseConfirmed())
   }
