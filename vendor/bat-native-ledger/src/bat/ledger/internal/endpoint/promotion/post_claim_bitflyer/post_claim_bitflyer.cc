@@ -7,6 +7,7 @@
 
 #include <utility>
 
+#include "base/json/json_reader.h"
 #include "base/json/json_writer.h"
 #include "base/strings/stringprintf.h"
 #include "bat/ledger/internal/common/request_util.h"
@@ -65,7 +66,7 @@ type::Result PostClaimBitflyer::CheckStatusCode(const int status_code) {
 
   if (status_code == net::HTTP_FORBIDDEN) {
     BLOG(0, "Forbidden");
-    return type::Result::MISMATCHED_PROVIDER_ACCOUNTS;
+    return type::Result::IN_PROGRESS;
   }
 
   if (status_code == net::HTTP_NOT_FOUND) {
@@ -89,6 +90,33 @@ type::Result PostClaimBitflyer::CheckStatusCode(const int status_code) {
   }
 
   return type::Result::LEDGER_OK;
+}
+
+type::Result PostClaimBitflyer::ParseBody(const std::string& body) const {
+  if (body.find("Forbidden") != std::string::npos) {
+    return type::Result::REQUEST_SIGNATURE_VERIFICATION_FAILURE;
+  }
+
+  base::DictionaryValue* root = nullptr;
+  auto value = base::JSONReader::Read(body);
+  if (!value || !value->GetAsDictionary(&root)) {
+    BLOG(0, "Invalid body!");
+    return type::Result::LEDGER_ERROR;
+  }
+  DCHECK(root);
+
+  auto* message = root->FindStringKey("message");
+  if (!message) {
+    BLOG(0, "message is missing!");
+    return type::Result::LEDGER_ERROR;
+  }
+
+  if (message->find("wallets do not match") != std::string::npos) {
+    return type::Result::MISMATCHED_PROVIDER_ACCOUNTS;
+  } else {
+    BLOG(0, "Unknown message!");
+    return type::Result::LEDGER_ERROR;
+  }
 }
 
 void PostClaimBitflyer::Request(const std::string& linking_info,
@@ -121,7 +149,14 @@ void PostClaimBitflyer::Request(const std::string& linking_info,
 void PostClaimBitflyer::OnRequest(const type::UrlResponse& response,
                                   PostClaimBitflyerCallback callback) {
   ledger::LogUrlResponse(__func__, response);
-  callback(CheckStatusCode(response.status_code));
+
+  auto result = CheckStatusCode(response.status_code);
+  if (result == type::Result::IN_PROGRESS) {
+    // disambiguating on the HTTP 403 (Forbidden)
+    result = ParseBody(response.body);
+  }
+
+  callback(result);
 }
 
 }  // namespace promotion

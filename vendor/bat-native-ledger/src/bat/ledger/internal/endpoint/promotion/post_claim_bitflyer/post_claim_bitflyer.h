@@ -53,6 +53,8 @@ class PostClaimBitflyer {
 
   type::Result CheckStatusCode(const int status_code);
 
+  type::Result ParseBody(const std::string& body) const;
+
   void OnRequest(const type::UrlResponse& response,
                  PostClaimBitflyerCallback callback);
 

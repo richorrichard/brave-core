@@ -62,6 +62,8 @@ class PostClaimUphold {
 
   type::Result CheckStatusCode(const int status_code) const;
 
+  type::Result ParseBody(const std::string& body) const;
+
   LedgerImpl* ledger_;  // NOT OWNED
 };
 

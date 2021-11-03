@@ -37,6 +37,22 @@ type::Result GetReturnValueForUserStatus(UserStatus status) {
       return type::Result::LEDGER_ERROR;
   }
 }
+
+std::string GetEventKeyForLinkingResult(type::Result result) {
+  switch (result) {
+    case type::Result::DEVICE_LIMIT_REACHED:
+      return log::kDeviceLimitReached;
+    case type::Result::MISMATCHED_PROVIDER_ACCOUNTS:
+      return log::kMismatchedProviderAccounts;
+    case type::Result::NOT_FOUND:
+      return log::kKYCRequired;
+    case type::Result::UPHOLD_TRANSACTION_VERIFICATION_FAILURE:
+      return log::kTransactionVerificationFailure;
+    default:
+      NOTREACHED();
+      return "";
+  }
+}
 }  // namespace
 
 UpholdWallet::UpholdWallet(LedgerImpl* ledger)
@@ -256,30 +272,22 @@ void UpholdWallet::OnLinkWallet(const type::Result result,
   DCHECK(uphold_wallet->address.empty());
   DCHECK(!id.empty());
 
-  if (result == type::Result::DEVICE_LIMIT_REACHED) {
-    // Entering NOT_CONNECTED.
-    ledger_->uphold()->DisconnectWallet("");
-
-    ledger_->database()->SaveEventLog(
-        log::kDeviceLimitReached,
-        constant::kWalletUphold + std::string("/") + id.substr(0, 5));
-
-    return callback(type::Result::DEVICE_LIMIT_REACHED);
-  }
-
-  if (result == type::Result::MISMATCHED_PROVIDER_ACCOUNTS) {
-    // Entering NOT_CONNECTED.
-    ledger_->uphold()->DisconnectWallet("");
-
-    ledger_->database()->SaveEventLog(
-        log::kMismatchedProviderAccounts,
-        constant::kWalletUphold + std::string("/") + id.substr(0, 5));
-
-    return callback(type::Result::MISMATCHED_PROVIDER_ACCOUNTS);
-  }
-
-  if (result != type::Result::LEDGER_OK) {
-    return callback(type::Result::CONTINUE);
+  switch (result) {
+    case type::Result::DEVICE_LIMIT_REACHED:
+    case type::Result::MISMATCHED_PROVIDER_ACCOUNTS:
+    case type::Result::NOT_FOUND:  // KYC required
+    case type::Result::UPHOLD_TRANSACTION_VERIFICATION_FAILURE:
+      // Entering NOT_CONNECTED.
+      ledger_->uphold()->DisconnectWallet("");
+      ledger_->database()->SaveEventLog(
+          GetEventKeyForLinkingResult(result),
+          constant::kWalletUphold + std::string("/") + id.substr(0, 5));
+      return callback(result);
+    default:
+      if (result != type::Result::LEDGER_OK) {
+        BLOG(0, "Couldn't claim wallet!");
+        return callback(type::Result::CONTINUE);
+      }
   }
 
   const auto from = uphold_wallet->status;
