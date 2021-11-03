@@ -2880,10 +2880,11 @@ void RewardsServiceImpl::OnExternalWalletAuthorization(
   std::move(callback).Run(result, args);
 }
 
-void RewardsServiceImpl::ExternalWalletAuthorization(
-      const std::string& wallet_type,
-      const base::flat_map<std::string, std::string>& args,
-      ExternalWalletAuthorizationCallback callback) {
+void RewardsServiceImpl::OnDisconnectWalletsForAuthorization(
+    const std::string& wallet_type,
+    const base::flat_map<std::string, std::string>& args,
+    ExternalWalletAuthorizationCallback callback,
+    ledger::type::Result result) {
   if (!Connected()) {
     return;
   }
@@ -2895,6 +2896,19 @@ void RewardsServiceImpl::ExternalWalletAuthorization(
                      AsWeakPtr(),
                      wallet_type,
                      std::move(callback)));
+}
+
+void RewardsServiceImpl::ExternalWalletAuthorization(
+    const std::string& wallet_type,
+    const base::flat_map<std::string, std::string>& args,
+    ExternalWalletAuthorizationCallback callback) {
+  if (!Connected()) {
+    return;
+  }
+
+  bat_ledger_->DisconnectExternalWallets(base::BindOnce(
+      &RewardsServiceImpl::OnDisconnectWalletsForAuthorization, AsWeakPtr(),
+      wallet_type, std::move(args), std::move(callback)));
 }
 
 void RewardsServiceImpl::OnProcessExternalWalletAuthorization(
