@@ -10,8 +10,8 @@
 
 #include "base/logging.h"
 #include "base/threading/sequenced_task_runner_handle.h"
-#include "brave/components/skus/browser/brave-rewards-cxx/src/wrapper.h"
 #include "brave/components/skus/browser/pref_names.h"
+#include "brave/components/skus/browser/rust/cxx/src/wrapper.h"
 #include "brave/components/skus/browser/skus_sdk_fetcher.h"
 #include "components/pref_registry/pref_registry_syncable.h"
 #include "components/prefs/pref_service.h"

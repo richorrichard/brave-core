@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include "brave/components/skus/browser/brave-rewards-cxx/src/wrapper.h"
+#include "brave/components/skus/browser/rust/cxx/src/wrapper.h"
 #include "net/base/load_flags.h"
 #include "url/gurl.h"
 

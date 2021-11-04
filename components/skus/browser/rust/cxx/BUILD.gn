@@ -1,0 +1,36 @@
+# Copyright (c) 2021 The Brave Authors. All rights reserved.
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import("//brave/build/cargo.gni")
+
+import("//build/config/features.gni")
+
+lib_build_path = "$root_build_dir/brave_rust/out/$current_cpu"
+lib_output_path =
+    "$lib_build_path/${cargo_lib_prefix}brave_rust${cargo_lib_suffix}"
+
+static_library("cxx") {
+  configs -= [
+    "//build/config/compiler:chromium_code",
+    "//build/config/clang:find_bad_constructs",
+  ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+
+  libs = [ lib_output_path ]
+
+  sources = [
+    "src/cxx.h",
+    "src/shim.h",
+    "src/wrapper.cc",
+    "src/wrapper.h",
+  ]
+
+  # TODO(bsclifton): troubleshoot why there are duplicate symbols on Windows
+  if (is_mac || is_linux) {
+    sources += [ "src/cxx.cc" ]
+  } else if (is_win) {
+    sources += [ "src/cxx_win.cc" ]
+  }
+}

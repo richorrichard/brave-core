@@ -9,7 +9,7 @@
 #include <memory>
 #include <string>
 
-#include "brave/components/skus/browser/brave-rewards-cxx/src/cxx.h"
+#include "brave/components/skus/browser/rust/cxx/src/cxx.h"
 #include "services/network/public/cpp/resource_request.h"
 #include "services/network/public/cpp/shared_url_loader_factory.h"
 #include "services/network/public/cpp/simple_url_loader.h"

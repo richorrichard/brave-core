@@ -10,7 +10,7 @@
 #include <string>
 
 #include "base/memory/weak_ptr.h"
-#include "brave/components/skus/browser/brave-rewards-cxx/src/wrapper.h"
+#include "brave/components/skus/browser/rust/cxx/src/wrapper.h"
 #include "brave/components/skus/common/skus_sdk.mojom.h"
 #include "components/keyed_service/core/keyed_service.h"
 

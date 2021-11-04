@@ -3,22 +3,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import("//brave/build/cargo.gni")
-
 import("//build/config/features.gni")
 
-lib_build_path = "$root_build_dir/brave_rust/out/$current_cpu"
-lib_output_path =
-    "$lib_build_path/${cargo_lib_prefix}brave_rust${cargo_lib_suffix}"
-
 static_library("browser") {
-  libs = [ lib_output_path ]
+  public_deps = [
+    "rust/cxx"
+  ]
 
   sources = [
-    "brave-rewards-cxx/src/cxx.h",
-    "brave-rewards-cxx/src/shim.h",
-    "brave-rewards-cxx/src/wrapper.cc",
-    "brave-rewards-cxx/src/wrapper.h",
     "pref_names.h",
     "skus_sdk_context.cc",
     "skus_sdk_context.h",
@@ -31,13 +23,6 @@ static_library("browser") {
     "switches.h",
   ]
 
-  # TODO(bsclifton): troubleshoot why there are duplicate symbols on Windows
-  if (is_mac || is_linux) {
-    sources += [ "brave-rewards-cxx/src/cxx.cc" ]
-  } else if (is_win) {
-    sources += [ "brave-rewards-cxx/src/cxx_win.cc" ]
-  }
-
   deps = [
     "//base",
     "//brave/components/skus/common:mojom",
@@ -49,11 +34,4 @@ static_library("browser") {
     "//services/preferences/public/cpp",
     "//url",
   ]
-
-  # TODO: this config should only be applying to the
-  # auto-generated rust files (wrapper.cpp, etc)
-  #
-  # I've tried making a separate target for those files but
-  # it still complains :/
-  configs -= [ "//build/config/clang:find_bad_constructs" ]
 }
