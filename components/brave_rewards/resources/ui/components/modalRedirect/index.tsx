@@ -24,6 +24,7 @@ export interface Props {
   learnMore?: string
   walletType?: string
   displayCloseButton?: boolean
+  isMobile?: boolean
   onClick?: () => void
   onClose?: () => void
 }
@@ -44,7 +45,16 @@ export default class ModalRedirect extends React.PureComponent<Props, {}> {
   }
 
   render () {
-    const { id, errorText, titleText, learnMore, walletType, displayCloseButton, onClose } = this.props
+    const {
+      id,
+      errorText,
+      titleText,
+      learnMore,
+      walletType,
+      displayCloseButton,
+      isMobile,
+      onClose
+    } = this.props
     let tags = null
     if (errorText && errorText.includes('$1')) {
       tags = splitStringForTag(errorText)
@@ -56,7 +66,12 @@ export default class ModalRedirect extends React.PureComponent<Props, {}> {
     }
 
     return (
-      <Modal id={id} displayCloseButton={!!displayCloseButton} onClose={onClose}>
+      <Modal
+        id={id}
+        displayCloseButton={!!displayCloseButton}
+        isMobile={isMobile}
+        onClose={onClose}
+      >
         <StyledWrapper>
           <StyledTitle>
             {titleText}

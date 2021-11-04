@@ -294,7 +294,7 @@ class RewardsServiceImpl : public RewardsService,
 
   void GetExternalWallet(GetExternalWalletCallback callback) override;
 
-  std::string GetExternalWalletType() const;
+  std::string GetExternalWalletType() const override;
 
   const std::vector<std::string> GetExternalWalletProviders() const override;
 
