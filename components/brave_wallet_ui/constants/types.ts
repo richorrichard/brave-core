@@ -374,6 +374,16 @@ export interface SignHardwareTransactionType {
   error?: string
 }
 
+export type OperationResult = {
+  success: boolean
+  error?: string
+  code?: string | number
+}
+
+export type SignHardwareMessageOperationResult = OperationResult & {
+  payload?: string
+}
+
 export type SwapValidationErrorType =
   | 'insufficientBalance'
   | 'insufficientEthBalance'
