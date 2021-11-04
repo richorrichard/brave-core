@@ -9,45 +9,31 @@
 #include <memory>
 #include <string>
 
-#include "base/memory/ref_counted.h"
+#include "components/keyed_service/core/keyed_service.h"
 #include "components/prefs/pref_change_registrar.h"
-
-class PrefRegistrySimple;
-class PrefService;
 
 namespace network {
 class SharedURLLoaderFactory;
-}  // namespace network
+}
+
+class PrefRegistrySimple;
 
 namespace brave {
 
 class BraveOperationalPatterns;
 
-class BraveFederatedLearningService final {
+class BraveFederatedLearningService : public KeyedService {
  public:
-  BraveFederatedLearningService(
-      PrefService* pref_service,
-      scoped_refptr<network::SharedURLLoaderFactory> url_loader_factory);
-  ~BraveFederatedLearningService();
+  BraveFederatedLearningService();
+  ~BraveFederatedLearningService() override;
+
   BraveFederatedLearningService(const BraveFederatedLearningService&) = delete;
   BraveFederatedLearningService& operator=(
       const BraveFederatedLearningService&) = delete;
 
-  static void RegisterLocalStatePrefs(PrefRegistrySimple* registry);
+  static void RegisterProfilePrefs(PrefRegistrySimple* registry);
 
-  void Start();
-
- private:
-  void InitPrefChangeRegistrar();
-  void OnPreferenceChanged(const std::string& key);
-
-  bool IsP3AEnabled();
-  bool IsOperationalPatternsEnabled();
-
-  PrefService* local_state_;
-  PrefChangeRegistrar local_state_change_registrar_;
-  std::unique_ptr<BraveOperationalPatterns> operational_patterns_;
-  scoped_refptr<network::SharedURLLoaderFactory> url_loader_factory_;
+  virtual void Start() = 0;
 };
 
 }  // namespace brave

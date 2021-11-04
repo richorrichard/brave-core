@@ -18,6 +18,7 @@
 #include "brave/components/binance/browser/buildflags/buildflags.h"
 #include "brave/components/brave_adaptive_captcha/buildflags/buildflags.h"
 #include "brave/components/brave_ads/browser/ads_p2a.h"
+#include "brave/components/brave_federated_learning/brave_federated_learning_service.h"
 #include "brave/components/brave_perf_predictor/browser/p3a_bandwidth_savings_tracker.h"
 #include "brave/components/brave_perf_predictor/browser/perf_predictor_tab_helper.h"
 #include "brave/components/brave_rewards/common/pref_names.h"
@@ -172,6 +173,7 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
   registry->RegisterBooleanPref(kTabsSearchShow, true);
 
   brave_sync::Prefs::RegisterProfilePrefs(registry);
+  brave::BraveFederatedLearningService::RegisterProfilePrefs(registry);
 
 #if BUILDFLAG(ENABLE_BRAVE_VPN) && !defined(OS_ANDROID)
   brave_vpn::prefs::RegisterProfilePrefs(registry);
