@@ -27,7 +27,6 @@ export default class APIProxy implements APIProxyControllers {
   addKeyringControllerObserver: (store: any) => void
   addEthTxControllerObserverObserver: (store: any) => void
   addBraveWalletServiceObserver: (store: any) => void
-  getKeyringsByType: (type: string) => any
   makeTxData: (
     nonce: string,
     gasPrice: string,

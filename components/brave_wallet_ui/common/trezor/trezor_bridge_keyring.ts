@@ -4,15 +4,15 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 /* global window */
 
-const { EventEmitter } = require('events')
 import { publicToAddress, toChecksumAddress, bufferToHex } from 'ethereumjs-util'
 import { Transaction } from 'ethereumjs-tx'
 import {
-  TrezorDerivationPaths, TrezorBridgeAccountsPayload
+  TrezorDerivationPaths, TrezorBridgeAccountsPayload, HardwareWalletAccount
 } from '../../components/desktop/popup-modals/add-account-modal/hardware-wallet-connect/types'
 import {
   kTrezorHardwareVendor,
   SignHardwareMessageOperationResult,
+  SignHardwareTransactionOperationResult,
   TransactionInfo
 } from '../../constants/types'
 import {
@@ -21,28 +21,30 @@ import {
   GetAccountsResponsePayload,
   TrezorAccount,
   SignTransactionCommandPayload,
-  SignTransactionResponse,
-  TrezorError,
   TrezorFrameCommand,
   SignMessageCommandPayload,
-  SignMessageResponsePayload
+  SignMessageResponsePayload,
+  SignTransactionResponsePayload
 } from '../../common/trezor/trezor-messages'
 import { sendTrezorCommand } from '../../common/trezor/trezor-bridge-transport'
 import { getLocale } from '../../../common/locale'
 import { hardwareDeviceIdFromAddress } from '../hardwareDeviceIdFromAddress'
-import { EthereumSignedTx } from 'trezor-connect/lib/typescript/trezor/protobuf'
+import { TrezorKeyring } from '../api/hardwareKeyring'
 
-export default class TrezorBridgeKeyring extends EventEmitter {
+export default class TrezorBridgeKeyring extends TrezorKeyring {
+  protected deviceId: string
   constructor () {
     super()
-    this.unlocked_ = false
+    this.unlocked = false
   }
 
-  type = () => {
+  protected unlocked: Boolean
+
+  type = (): string => {
     return kTrezorHardwareVendor
   }
 
-  getAccounts = async (from: number, to: number, scheme: string) => {
+  getAccounts = async (from: number, to: number, scheme: string): Promise<HardwareWalletAccount[] | Error> => {
     if (from < 0) {
       from = 0
     }
@@ -66,22 +68,24 @@ export default class TrezorBridgeKeyring extends EventEmitter {
     return accounts.accounts
   }
 
-  signTransaction = async (path: string, txInfo: TransactionInfo, chainId: string): Promise<EthereumSignedTx | TrezorError> => {
+  signTransaction = async (path: string, txInfo: TransactionInfo, chainId: string): Promise<SignHardwareTransactionOperationResult> => {
     if (!this.isUnlocked() && !(await this.unlock())) {
-      return { error: getLocale('braveWalletUnlockError') }
+      return { success: false, error: getLocale('braveWalletUnlockError') }
     }
-    const data = await this.sendTrezorCommand<SignTransactionResponse>({
+    const data = await this.sendTrezorCommand<SignTransactionResponsePayload>({
       command: TrezorCommand.SignTransaction,
       // @ts-ignore
       id: crypto.randomUUID(),
       payload: this.prepareTransactionPayload(path, txInfo, chainId),
       origin: window.origin
     })
-    if (!data) {
-      return { error: getLocale('braveWalletProcessTransactionError') }
+    if (!data || !data.payload) {
+      return { success: false, error: getLocale('braveWalletProcessTransactionError') }
     }
-
-    return data.payload
+    if (!data.payload.success) {
+      return { success: false, error: data.payload.payload.error, code: data.payload.payload.code }
+    }
+    return { success: true, payload: data.payload.payload }
   }
 
   signPersonalMessage = async (path: string, message: string): Promise<SignHardwareMessageOperationResult> => {
@@ -106,19 +110,19 @@ export default class TrezorBridgeKeyring extends EventEmitter {
   }
 
   isUnlocked = () => {
-    return this.unlocked_
+    return this.unlocked
   }
 
-  unlock = async () => {
+  unlock = async (): Promise<Boolean | Error> => {
     const data = await this.sendTrezorCommand<UnlockResponse>({
       // @ts-ignore
       id: crypto.randomUUID(),
       origin: window.origin,
       command: TrezorCommand.Unlock })
     if (!data) {
-      return false
+      return new Error(getLocale('braveWalletUnlockError'))
     }
-    this.unlocked_ = data.result
+    this.unlocked = data.result
     if (data.result) {
       return true
     }
@@ -198,7 +202,7 @@ export default class TrezorBridgeKeyring extends EventEmitter {
 
     let accounts = []
     const accountsList = data.payload.payload as TrezorAccount[]
-    this.deviceId_ = await this.getDeviceIdFromAccountsList(accountsList)
+    this.deviceId = await this.getDeviceIdFromAccountsList(accountsList)
     const zeroPath = this.getPathForIndex(0, TrezorDerivationPaths.Default)
     for (const value of accountsList) {
       // If requested addresses do not have zero indexed adress we add it
@@ -212,7 +216,7 @@ export default class TrezorBridgeKeyring extends EventEmitter {
         derivationPath: value.serializedPath,
         name: this.type(),
         hardwareVendor: this.type(),
-        deviceId: this.deviceId_
+        deviceId: this.deviceId
       })
     }
     return { success: true, accounts: [...accounts] }

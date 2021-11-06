@@ -9,11 +9,7 @@ import 'gen/url/mojom/url.mojom-lite.js'
 import 'gen/mojo/public/mojom/base/time.mojom-lite.js';
 import 'gen/brave/components/brave_wallet/common/brave_wallet.mojom-lite.js'
 import * as WalletActions from '../common/actions/wallet_actions'
-import LedgerBridgeKeyring from '../common/ledgerjs/eth_ledger_bridge_keyring'
-import TrezorBridgeKeyring from '../common/trezor/trezor_bridge_keyring'
-import {
-  kLedgerHardwareVendor, kTrezorHardwareVendor
-} from '../constants/types'
+import { getKeyringByType } from './api/getKeyringsByType'
 
 // TODO(petemill): Convert this module to Typescript, and import
 // es-module versions of mojom bindings, e.g.
@@ -34,15 +30,13 @@ export default class WalletApiProxy {
     /** @type {!braveWallet.mojom.AssetRatioControllerRemote} */
     this.assetRatioController = new braveWallet.mojom.AssetRatioControllerRemote();
     /** @type {!braveWallet.mojom.KeyringControllerRemote} */
-    this.keyringController = new braveWallet.mojom.KeyringControllerRemote();
+    this.keyringController = getKeyringByType();
     /** @type {!braveWallet.mojom.KeyringControllerRemote} */
     this.ercTokenRegistry = new braveWallet.mojom.ERCTokenRegistryRemote();
     /** @type {!braveWallet.mojom.EthTxControllerRemote} */
     this.ethTxController = new braveWallet.mojom.EthTxControllerRemote();
     /** @type {!braveWallet.mojom.BraveWalletServiceRemote} */
     this.braveWalletService = new braveWallet.mojom.BraveWalletServiceRemote();
-    this.ledgerHardwareKeyring = new LedgerBridgeKeyring();
-    this.trezorHardwareKeyring = new TrezorBridgeKeyring();
   }
 
   addEthJsonRpcControllerObserver(store) {
@@ -77,15 +71,6 @@ export default class WalletApiProxy {
     txData.maxFeePerGas = maxFeePerGas
     txData.chainId = chainId
     return txData
-  }
-
-  getKeyringsByType(type) {
-    if (type == kLedgerHardwareVendor) {
-      return this.ledgerHardwareKeyring;
-    } else if (type == kTrezorHardwareVendor) {
-      return this.trezorHardwareKeyring;
-    }
-    return this.keyringController;
   }
 
   addKeyringControllerObserver(store) {

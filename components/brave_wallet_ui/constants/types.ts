@@ -1,3 +1,5 @@
+import { EthereumSignedTx } from 'trezor-connect/lib/typescript/trezor/protobuf'
+
 // url.mojom.Url
 export interface Url {
   url: string
@@ -382,6 +384,10 @@ export type OperationResult = {
 
 export type SignHardwareMessageOperationResult = OperationResult & {
   payload?: string
+}
+
+export type SignHardwareTransactionOperationResult = OperationResult & {
+  payload?: EthereumSignedTx
 }
 
 export type SwapValidationErrorType =
@@ -885,7 +891,6 @@ export interface APIProxyControllers {
   ercTokenRegistry: ERCTokenRegistry
   ethTxController: EthTxController
   braveWalletService: BraveWalletService
-  getKeyringsByType: (type: string) => any
   makeTxData: (
     nonce: string,
     gasPrice: string,
