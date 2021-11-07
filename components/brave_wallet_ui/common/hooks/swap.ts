@@ -142,6 +142,8 @@ export default function useSwap (
       default:
         return 'unknownError'
     }
+
+    return undefined
   }, [fromAsset, fromAmount, fromAssetBalance, ethBalance, feesBN, rawError, allowance])
 
   /**
