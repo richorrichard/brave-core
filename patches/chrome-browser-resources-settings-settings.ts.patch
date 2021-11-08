@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/resources/settings/settings.ts b/chrome/browser/resources/settings/settings.ts
-index 43dc33ae5e7cdcb526c1f57a8ea208a95ee02e54..53aba6228950932840cee7043347373b3b129834 100644
+index f6263269e5cb0aa497a4b443e888c5c2f31bd82f..6a665d769c4fdddd9d03281bd2bf4f00d289498c 100644
 --- a/chrome/browser/resources/settings/settings.ts
 +++ b/chrome/browser/resources/settings/settings.ts
 @@ -2,6 +2,7 @@
@@ -9,4 +9,4 @@ index 43dc33ae5e7cdcb526c1f57a8ea208a95ee02e54..53aba6228950932840cee7043347373b
 +import './brave_overrides/index.js';
  import './settings_ui/settings_ui.js';
  
- export {CrDrawerElement} from 'chrome://resources/cr_elements/cr_drawer/cr_drawer.js';
+ export {CrButtonElement} from 'chrome://resources/cr_elements/cr_button/cr_button.m.js';
