@@ -13,6 +13,8 @@ class Profile;
 class BraveRelaunchHandler : public settings::SettingsPageUIHandler {
  public:
   BraveRelaunchHandler() = default;
+  BraveRelaunchHandler(const BraveRelaunchHandler&) = delete;
+  BraveRelaunchHandler& operator=(const BraveRelaunchHandler&) = delete;
   ~BraveRelaunchHandler() override = default;
 
  private:
@@ -22,8 +24,6 @@ class BraveRelaunchHandler : public settings::SettingsPageUIHandler {
   void OnJavascriptDisallowed() override {}
 
   void Relaunch(base::Value::ConstListView args);
-
-  DISALLOW_COPY_AND_ASSIGN(BraveRelaunchHandler);
 };
 
 #endif  // BRAVE_BROWSER_UI_WEBUI_SETTINGS_BRAVE_RELAUNCH_HANDLER_MAC_H_
