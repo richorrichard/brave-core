@@ -20,7 +20,6 @@ export interface Props {
 }
 
 export default class AppList extends React.PureComponent<Props> {
-
   checkIsSelected = (app: AppObjectType) => {
     return this.props.favApps.some((a) => a.name === app.name)
   }

@@ -174,8 +174,8 @@ const EditVisibleAssetsModal = (props: Props) => {
       const newToken: TokenInfo = {
         contractAddress: tokenContractAddress,
         decimals: Number(tokenDecimals),
-        isErc20: tokenID ? false : true,
-        isErc721: tokenID ? true : false,
+        isErc20: !tokenID,
+        isErc721: !!tokenID,
         name: tokenName,
         symbol: tokenSymbol,
         tokenId: tokenID ? toHex(tokenID) : '',
@@ -265,12 +265,12 @@ const EditVisibleAssetsModal = (props: Props) => {
   }, [foundToken, tokenID])
 
   const buttonDisabled = React.useMemo((): boolean => {
-    return tokenName === ''
-      || tokenSymbol === ''
-      || (tokenDecimals === '0' && tokenID === '')
-      || tokenDecimals === ''
-      || tokenContractAddress === ''
-      || !tokenContractAddress.toLowerCase().startsWith('0x')
+    return tokenName === '' ||
+      tokenSymbol === '' ||
+      (tokenDecimals === '0' && tokenID === '') ||
+      tokenDecimals === '' ||
+      tokenContractAddress === '' ||
+      !tokenContractAddress.toLowerCase().startsWith('0x')
   }, [tokenName, tokenSymbol, tokenDecimals, tokenID, tokenContractAddress])
 
   return (

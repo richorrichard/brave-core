@@ -393,7 +393,7 @@ export const _DesktopWalletConcept = (args: { onboarding: boolean, locked: boole
     const response = mockRPCResponse
     const amounts = response.map((account) => {
       const balance = account.assets.find((item) => item.id === asset.contractAddress)?.balance
-      return balance ? balance : 0
+      return balance || 0
     })
     const grandTotal = amounts.reduce(function (a, b) {
       return a + b
@@ -418,7 +418,6 @@ export const _DesktopWalletConcept = (args: { onboarding: boolean, locked: boole
         assetBalance: scrapedFullAssetBalance(asset).toString(),
         fiatBalance: scrapedFullAssetFiatBalance(asset).toString()
       }
-
     })
   }, [mockUserWalletPreferences.viewableAssets])
 
@@ -675,8 +674,8 @@ export const _DesktopWalletConcept = (args: { onboarding: boolean, locked: boole
           />
         ) : (
           <>
-            {needsOnboarding ?
-              (
+            {needsOnboarding
+              ? (
                 <Onboarding
                   importError={importWalletError}
                   recoveryPhrase={recoveryPhrase}

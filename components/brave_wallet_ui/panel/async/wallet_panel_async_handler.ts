@@ -229,8 +229,8 @@ handler.on(PanelActions.signMessageHardware.getType(), async (store, messageData
   const hardwareAccount = await findHardwareAccountInfo(messageData.address)
   if (hardwareAccount && hardwareAccount.hardware) {
     let deviceKeyring = await apiProxy.getKeyringsByType(hardwareAccount.hardware.vendor)
-    deviceKeyring.signPersonalMessage(hardwareAccount.hardware.path, hardwareAccount.address, messageData.message).
-      then(async (signature: string) => {
+    deviceKeyring.signPersonalMessage(hardwareAccount.hardware.path, hardwareAccount.address, messageData.message)
+      .then(async (signature: string) => {
         store.dispatch(PanelActions.signMessageHardwareProcessed({ success: true, id: messageData.id, signature: signature, error: '' }))
       }).catch(async (error: any) => {
         store.dispatch(PanelActions.signMessageHardwareProcessed({ success: false, id: messageData.id, signature: '', error: error.message }))

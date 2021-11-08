@@ -29,7 +29,6 @@ export default function useTimeout (
       window.addEventListener('mousemove', mousePosition)
       return () => window.removeEventListener('mousemove', mousePosition)
     }
-    return
   }, [isWalletLocked])
 
   React.useEffect(() => {
@@ -43,6 +42,5 @@ export default function useTimeout (
       }, 50000)
       return () => clearInterval(interval)
     }
-    return
   }, [isWalletLocked])
 }

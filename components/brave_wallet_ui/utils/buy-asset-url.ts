@@ -1,10 +1,12 @@
-import { AccountAssetOptionType,
+import {
+ AccountAssetOptionType,
          UserAccountType,
          kMainnetChainId,
          kRopstenChainId,
          kKovanChainId,
          kRinkebyChainId,
-         kGoerliChainId } from '../constants/types'
+         kGoerliChainId
+} from '../constants/types'
 
 const wyreID = 'AC_MGNVBGHPA9T'
 

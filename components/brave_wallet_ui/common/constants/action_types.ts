@@ -33,7 +33,7 @@ export type ChainChangedEventPayloadType = {
 }
 
 export type IsEip1559Changed = {
-  chainId: string,
+  chainId: string
   isEip1559: boolean
 }
 
@@ -66,13 +66,13 @@ export type SetUserAssetVisiblePayloadType = {
 }
 
 export type SwapParamsPayloadType = {
-  fromAsset: AccountAssetOptionType,
-  toAsset: AccountAssetOptionType,
-  fromAssetAmount?: string,
-  toAssetAmount?: string,
-  slippageTolerance: SlippagePresetObjectType,
-  accountAddress: string,
-  networkChainId: string,
+  fromAsset: AccountAssetOptionType
+  toAsset: AccountAssetOptionType
+  fromAssetAmount?: string
+  toAssetAmount?: string
+  slippageTolerance: SlippagePresetObjectType
+  accountAddress: string
+  networkChainId: string
   full: boolean
 }
 
@@ -81,16 +81,16 @@ export type ActiveOriginChanged = {
 }
 
 export type UpdateUnapprovedTransactionGasFieldsType = {
-  txMetaId: string,
-  gasLimit: string,
-  gasPrice?: string,
-  maxPriorityFeePerGas?: string,
+  txMetaId: string
+  gasLimit: string
+  gasPrice?: string
+  maxPriorityFeePerGas?: string
   maxFeePerGas?: string
 }
 
 export type UpdateUnapprovedTransactionSpendAllowanceType = {
-  txMetaId: string,
-  spenderAddress: string,
+  txMetaId: string
+  spenderAddress: string
   allowance: string
 }
 
@@ -107,10 +107,10 @@ export type DefaultBaseCryptocurrencyChanged = {
 }
 
 export type SitePermissionsPayloadType = {
-  accounts: (WalletAccountType | undefined)[]
+  accounts: Array<WalletAccountType | undefined>
 }
 
 export type RemoveSitePermissionPayloadType = {
-  origin: string,
+  origin: string
   account: string
 }

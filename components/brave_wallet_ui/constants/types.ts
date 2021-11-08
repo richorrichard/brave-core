@@ -29,8 +29,8 @@ export interface AssetOptionType {
 }
 
 export interface SignatureVRS {
-  v: number,
-  r: string,
+  v: number
+  r: string
   s: string
 }
 
@@ -358,9 +358,9 @@ export interface SwapResponse {
 }
 
 export interface SwapErrorResponse {
-  code: number,
-  reason: string,
-  validationErrors: { field: string, code: number, reason: string }[]
+  code: number
+  reason: string
+  validationErrors: Array<{ field: string, code: number, reason: string }>
 }
 
 export interface SwapResponseReturnInfo {
@@ -396,7 +396,7 @@ export interface AssetPriceInfo {
 }
 
 export interface GetPriceReturnInfo {
-  success: boolean,
+  success: boolean
   values: AssetPriceInfo[]
 }
 
@@ -406,7 +406,7 @@ export interface GetPriceHistoryReturnInfo {
 }
 
 export interface GetPriceHistoryReturnObjectInfo {
-  success: boolean,
+  success: boolean
   values: GetPriceHistoryReturnInfo[]
 }
 
@@ -804,7 +804,7 @@ export interface BraveWalletService {
 }
 
 export interface RecoveryObject {
-  value: string,
+  value: string
   id: number
 }
 
@@ -888,10 +888,10 @@ export type TransactionDataType = {
 }
 
 export type AllowSpendReturnPayload = {
-  siteUrl: string,
-  contractAddress: string,
-  erc20Token: TokenInfo,
-  transactionFeeWei: string,
+  siteUrl: string
+  contractAddress: string
+  erc20Token: TokenInfo
+  transactionFeeWei: string
   transactionFeeFiat: string
   transactionData: TransactionDataType
 }
@@ -922,14 +922,14 @@ export const SwapSupportedChains = [
 // Keep in sync with components/brave_wallet/common/brave_wallet.mojom until
 // we auto generate this type file from mojo.
 export type EthereumChain = {
-  chainId: string,
-  chainName: string,
-  blockExplorerUrls: string[],
-  iconUrls: string[],
-  rpcUrls: string[],
-  symbol: string,
-  symbolName: string,
-  decimals: number,
+  chainId: string
+  chainName: string
+  blockExplorerUrls: string[]
+  iconUrls: string[]
+  rpcUrls: string[]
+  symbol: string
+  symbolName: string
+  decimals: number
   isEip1559: boolean
 }
 
@@ -938,7 +938,7 @@ export interface GetAllNetworksList {
 }
 
 export interface SwitchChainRequest {
-  origin: Url,
+  origin: Url
   chainId: string
 }
 
@@ -947,18 +947,18 @@ export interface SwitchChainRequestsList {
 }
 
 export type TransactionPanelPayload = {
-  transactionAmount: string,
-  transactionGas: string,
-  toAddress: string,
-  erc20Token: TokenInfo,
-  ethPrice: string,
-  tokenPrice: string,
+  transactionAmount: string
+  transactionGas: string
+  toAddress: string
+  erc20Token: TokenInfo
+  ethPrice: string
+  tokenPrice: string
   transactionData: TransactionDataType
 }
 
 export type UpdateAccountNamePayloadType = {
-  address: string,
-  name: string,
+  address: string
+  name: string
   isDerived: boolean
 }
 
