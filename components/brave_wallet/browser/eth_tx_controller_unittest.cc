@@ -830,7 +830,7 @@ TEST_F(EthTxControllerUnitTest, GetNonceForHardwareTransaction) {
   callback_called = false;
   eth_tx_controller_->GetNonceForHardwareTransaction(
       tx_meta_id, base::BindLambdaForTesting([&](const std::string& nonce) {
-        EXPECT_TRUE(nonce.size());
+        EXPECT_FALSE(nonce.empty());
         auto tx_meta = eth_tx_controller_->GetTxForTesting(tx_meta_id);
         EXPECT_TRUE(tx_meta);
         EXPECT_EQ(tx_meta->status, mojom::TransactionStatus::Unapproved);
@@ -878,7 +878,7 @@ TEST_F(EthTxControllerUnitTest, GetNonceForHardwareTransaction1559) {
   callback_called = false;
   eth_tx_controller_->GetNonceForHardwareTransaction(
       tx_meta_id, base::BindLambdaForTesting([&](const std::string& nonce) {
-        EXPECT_TRUE(nonce.size());
+        EXPECT_FALSE(nonce.empty());
         auto tx_meta = eth_tx_controller_->GetTxForTesting(tx_meta_id);
         EXPECT_TRUE(tx_meta);
         EXPECT_EQ(tx_meta->status, mojom::TransactionStatus::Unapproved);
@@ -907,7 +907,7 @@ TEST_F(EthTxControllerUnitTest, GetNonceForHardwareTransactionFail) {
   eth_tx_controller_->AddObserver(observer.GetReceiver());
   eth_tx_controller_->GetNonceForHardwareTransaction(
       std::string(), base::BindLambdaForTesting([&](const std::string& nonce) {
-        EXPECT_FALSE(nonce.size());
+        EXPECT_TRUE(nonce.empty());
         callback_called = true;
       }));
   base::RunLoop().RunUntilIdle();
