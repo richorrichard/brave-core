@@ -309,7 +309,7 @@ export async function signTrezorTransaction (apiProxy: APIProxyControllers, path
   }
   const { v, r, s } = signed.payload
   const result =
-    await apiProxy.ethTxController.processHardwareSignature(txInfo.id, v, r.replace('0x', ''), s.replace('0x', ''))
+    await apiProxy.ethTxController.processHardwareSignature(txInfo.id, v, r, s)
   if (!result.status) {
     return { success: false, error: getLocale('braveWalletProcessTransactionError') }
   }

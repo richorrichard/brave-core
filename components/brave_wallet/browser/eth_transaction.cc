@@ -197,12 +197,12 @@ bool EthTransaction::ProcessVRS(const std::string& v,
   }
 
   std::vector<uint8_t> r_decoded;
-  if (!base::HexStringToBytes(r, &r_decoded)) {
+  if (!base::HexStringToBytes(r.substr(2), &r_decoded)) {
     LOG(ERROR) << "Unable to decode r param";
     return false;
   }
   std::vector<uint8_t> s_decoded;
-  if (!base::HexStringToBytes(s, &s_decoded)) {
+  if (!base::HexStringToBytes(s.substr(2), &s_decoded)) {
     LOG(ERROR) << "Unable to decode s param";
     return false;
   }
