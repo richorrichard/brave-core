@@ -26,7 +26,7 @@ import {
 import { sendTrezorCommand } from '../../common/trezor/trezor-bridge-transport'
 import { getLocale } from '../../../common/locale'
 import { hardwareDeviceIdFromAddress } from '../hardwareDeviceIdFromAddress'
-import { EthereumSignedTx } from 'trezor-connect/lib/typescript/trezor/protobuf'
+import { EthereumSignedTx } from 'trezor-connect/lib/typescript/networks/ethereum'
 
 export default class TrezorBridgeKeyring extends EventEmitter {
   constructor () {
@@ -121,6 +121,30 @@ export default class TrezorBridgeKeyring extends EventEmitter {
   }
 
   private prepareTransactionPayload = (path: string, txInfo: TransactionInfo, chainId: string): SignTransactionCommandPayload => {
+    const isEIP1559Transaction = txInfo.txData.maxPriorityFeePerGas !== '' && txInfo.txData.maxFeePerGas !== ''
+    if (isEIP1559Transaction) {
+      return this.createEIP1559TransactionPayload(path, txInfo, chainId)
+    }
+    return this.createLegacyTransactionPayload(path, txInfo, chainId)
+  }
+
+  private createEIP1559TransactionPayload = (path: string, txInfo: TransactionInfo, chainId: string): SignTransactionCommandPayload => {
+    return {
+      path: path,
+      transaction: {
+        to: txInfo.txData.baseData.to,
+        value: txInfo.txData.baseData.value,
+        data: bufferToHex(Buffer.from(txInfo.txData.baseData.data)).toString(),
+        chainId: parseInt(chainId, 16),
+        nonce: txInfo.txData.baseData.nonce,
+        gasLimit: txInfo.txData.baseData.gasLimit,
+        maxFeePerGas: txInfo.txData.maxFeePerGas,
+        maxPriorityFeePerGas: txInfo.txData.maxPriorityFeePerGas
+      }
+    }
+  }
+
+  private createLegacyTransactionPayload = (path: string, txInfo: TransactionInfo, chainId: string): SignTransactionCommandPayload => {
     return {
       path: path,
       transaction: {

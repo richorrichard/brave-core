@@ -4,7 +4,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 
 import TrezorConnect, { Unsuccessful, Success } from 'trezor-connect'
-import { EthereumSignedTx } from 'trezor-connect/lib/typescript/trezor/protobuf'
+import { EthereumSignedTx } from 'trezor-connect/lib/typescript/networks/ethereum'
 import {
   TrezorCommand,
   UnlockCommand,

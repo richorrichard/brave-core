@@ -4,7 +4,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 import { loadTimeData } from '../../../common/loadTimeData'
 import { Unsuccessful, EthereumSignTransaction, CommonParams, Success } from 'trezor-connect'
-import { EthereumSignedTx, HDNodeResponse } from 'trezor-connect/lib/typescript/trezor/protobuf'
+import { HDNodeResponse } from 'trezor-connect/lib/typescript'
+import { EthereumSignedTx } from 'trezor-connect/lib/typescript/networks/ethereum'
 export const kTrezorBridgeUrl = loadTimeData.getString('braveWalletTrezorBridgeUrl')
 
 export enum TrezorCommand {
