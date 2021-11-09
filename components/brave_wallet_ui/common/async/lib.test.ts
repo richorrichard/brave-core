@@ -11,7 +11,8 @@ GetTransactionMessageToSignReturnInfo,
 SignatureVRS,
 kLedgerHardwareVendor,
 kTrezorHardwareVendor,
-ProcessHardwareSignatureReturnInfo
+ProcessHardwareSignatureReturnInfo,
+SignHardwareTransactionType
 } from '../../constants/types'
 import {
 signTrezorTransaction,
@@ -105,100 +106,79 @@ const getMockedProxyControllers = (expectedId: string,
   }
 }
 
+const signTransactionWithLedger = (vrs?: SignatureVRS, signatureResponse?: boolean): Promise<SignHardwareTransactionType> => {
+  const txInfo = getMockedTransactionInfo()
+  const expectedData = 'raw_message_to_sign'
+  const messageToSign = { message: expectedData }
+  const expectedPath = 'path'
+  const mockedKeyring = getMockedLedgerKeyring(expectedPath, expectedData, vrs)
+  const signed = signatureResponse ? { status: signatureResponse } : undefined
+  const apiProxy = getMockedProxyControllers(txInfo.id, { nonce: '0x1' }, messageToSign,
+                                              mockedKeyring, signed)
+  return signLedgerTransaction(apiProxy as unknown as APIProxyControllers,
+      expectedPath, txInfo)
+}
+
+const hardwareTransactionErrorResponse = (errorId: string): SignHardwareTransactionType => {
+  return { success: false, error: getLocale(errorId) }
+}
+
+const signTransactionWithTrezor = (signed: Success<EthereumSignedTx> | Unsuccessful, signatureResponse?: ProcessHardwareSignatureReturnInfo) => {
+  const txInfo = getMockedTransactionInfo()
+  const expectedPath = 'path'
+  const mockedKeyring = getMockedTrezorKeyring(expectedPath, txInfo, signed)
+  const apiProxy = getMockedProxyControllers(txInfo.id, { nonce: '0x1' }, undefined, mockedKeyring, signatureResponse)
+  return signTrezorTransaction(apiProxy as unknown as APIProxyControllers,
+    expectedPath, txInfo)
+}
+
 test('Test sign Ledger transaction, nonce failed', () => {
   const txInfo = getMockedTransactionInfo()
   const apiProxy = getMockedProxyControllers(txInfo.id, { nonce: '' })
-  const expectedError = { success: false, error: getLocale('braveWalletApproveTransactionError') }
   return expect(signLedgerTransaction(apiProxy as unknown as APIProxyControllers,
-    'path', txInfo)).resolves.toStrictEqual(expectedError)
+    'path', txInfo)).resolves.toStrictEqual(hardwareTransactionErrorResponse('braveWalletApproveTransactionError'))
 })
 
 test('Test sign Ledger transaction, approved, no message to sign', () => {
   const txInfo = getMockedTransactionInfo()
   const apiProxy = getMockedProxyControllers(txInfo.id, { nonce: '0x1' })
-  const expectedError = { success: false, error: getLocale('braveWalletNoMessageToSignError') }
   return expect(signLedgerTransaction(apiProxy as unknown as APIProxyControllers,
-    'path', txInfo)).resolves.toStrictEqual(expectedError)
+    'path', txInfo)).resolves.toStrictEqual(hardwareTransactionErrorResponse('braveWalletNoMessageToSignError'))
 })
 
 test('Test sign Ledger transaction, approved, device error', () => {
-  const txInfo = getMockedTransactionInfo()
-  const expectedData = 'mockedmessage'
-  const messageToSign = { message: expectedData }
-  const expectedPath = 'test'
-  const mockedKeyring = getMockedLedgerKeyring(expectedPath, expectedData)
-  const apiProxy = getMockedProxyControllers(txInfo.id, { nonce: '0x1' }, messageToSign, mockedKeyring)
-  const expectedError = { success: false, error: getLocale('braveWalletSignOnDeviceError') }
-  return expect(signLedgerTransaction(apiProxy as unknown as APIProxyControllers,
-    expectedPath, txInfo)).resolves.toStrictEqual(expectedError)
+  return expect(signTransactionWithLedger()).resolves.toStrictEqual(
+    hardwareTransactionErrorResponse('braveWalletSignOnDeviceError'))
 })
 
 test('Test sign Ledger transaction, approved, processing error', () => {
-  const txInfo = getMockedTransactionInfo()
-  const expectedData = 'raw_message_to_sign'
-  const messageToSign = { message: expectedData }
-  const expectedPath = 'path'
-  const vrs = { v: 1, r: 'R', s: 'S' } as SignatureVRS
-  const mockedKeyring = getMockedLedgerKeyring(expectedPath, expectedData, vrs)
-  const apiProxy = getMockedProxyControllers(txInfo.id, { nonce: '0x1' }, messageToSign, mockedKeyring)
-  const expectedError = { success: false, error: getLocale('braveWalletProcessTransactionError') }
-  return expect(signLedgerTransaction(apiProxy as unknown as APIProxyControllers,
-    expectedPath, txInfo)).resolves.toStrictEqual(expectedError)
+  return expect(signTransactionWithLedger({ v: 1, r: 'R', s: 'S' })).resolves.toStrictEqual(
+      hardwareTransactionErrorResponse('braveWalletProcessTransactionError'))
 })
 
 test('Test sign Ledger transaction, approved, processed', () => {
-  const txInfo = getMockedTransactionInfo()
-  const expectedData = 'raw_message_to_sign'
-  const messageToSign = { message: expectedData }
-  const expectedPath = 'path'
-  const vrs = { v: 1, r: 'R', s: 'S' } as SignatureVRS
-  const mockedKeyring = getMockedLedgerKeyring(expectedPath, expectedData, vrs)
-  const signatureResponse = { status: true }
-  const apiProxy = getMockedProxyControllers(txInfo.id, { nonce: '0x1' }, messageToSign, mockedKeyring, signatureResponse)
-  return expect(signLedgerTransaction(apiProxy as unknown as APIProxyControllers,
-    expectedPath, txInfo)).resolves.toStrictEqual({ success: true })
+  return expect(signTransactionWithLedger({ v: 1, r: 'R', s: 'S' }, true)).resolves.toStrictEqual({ success: true })
 })
 
 test('Test sign Trezor transaction, approve failed', () => {
   const txInfo = getMockedTransactionInfo()
   const apiProxy = getMockedProxyControllers(txInfo.id, { nonce: '' })
-  const expectedError = { success: false, error: getLocale('braveWalletApproveTransactionError') }
   return expect(signTrezorTransaction(apiProxy as unknown as APIProxyControllers,
-         'path', txInfo)).resolves.toStrictEqual(expectedError)
+         'path', txInfo)).resolves.toStrictEqual(
+          hardwareTransactionErrorResponse('braveWalletApproveTransactionError'))
 })
 
 test('Test sign Trezor transaction, approved, device error', () => {
-  const txInfo = getMockedTransactionInfo()
-  const expectedPath = 'path'
-  const signed = { success: false, payload: {  error: 'error', code: '111' } } as Unsuccessful
-  const mockedKeyring = getMockedTrezorKeyring(expectedPath, txInfo, signed)
-  const apiProxy = getMockedProxyControllers(txInfo.id, { nonce: '0x1' }, undefined, mockedKeyring)
-  const expectedError = { success: false, error: getLocale('braveWalletSignOnDeviceError') }
-  return expect(signTrezorTransaction(apiProxy as unknown as APIProxyControllers,
-    expectedPath, txInfo)).resolves.toStrictEqual(expectedError)
+  return expect(signTransactionWithTrezor({ success: false, payload: {  error: 'error', code: '111' } }))
+                .resolves.toStrictEqual(hardwareTransactionErrorResponse('braveWalletSignOnDeviceError'))
 })
 
 test('Test sign Trezor transaction, approved, processing error', () => {
-  const txInfo = getMockedTransactionInfo()
-  const expectedPath = 'path'
-  const vrs = { v: '0xV', r: '0xR', s: '0xS' } as EthereumSignedTx
-  const signed = { success: true, payload: vrs } as Success<EthereumSignedTx>
-  const mockedKeyring = getMockedTrezorKeyring(expectedPath, txInfo, signed)
-  const signatureResponse = { status: false }
-  const apiProxy = getMockedProxyControllers(txInfo.id, { nonce: '0x1' }, undefined, mockedKeyring, signatureResponse)
-  const expectedError = { success: false, error: getLocale('braveWalletProcessTransactionError') }
-  return expect(signTrezorTransaction(apiProxy as unknown as APIProxyControllers,
-    expectedPath, txInfo)).resolves.toStrictEqual(expectedError)
+  return expect(signTransactionWithTrezor({ success: true, payload: { v: '0xV', r: '0xR', s: '0xS' } }, { status: false })).resolves.toStrictEqual(
+      hardwareTransactionErrorResponse('braveWalletProcessTransactionError'))
 })
 
 test('Test sign Trezor transaction, approved, processed', () => {
-  const txInfo = getMockedTransactionInfo()
-  const expectedPath = 'path'
-  const vrs = { v: '0xV', r: '0xR', s: '0xS' } as EthereumSignedTx
-  const signed = { success: true, payload: vrs } as Success<EthereumSignedTx>
-  const mockedKeyring = getMockedTrezorKeyring(expectedPath, txInfo, signed)
-  const signatureResponse = { status: true }
-  const apiProxy = getMockedProxyControllers(txInfo.id, { nonce: '0x1' }, undefined, mockedKeyring, signatureResponse)
-  return expect(signTrezorTransaction(apiProxy as unknown as APIProxyControllers,
-    expectedPath, txInfo)).resolves.toStrictEqual({ success: true })
+  return expect(signTransactionWithTrezor({ success: true, payload: { v: '0xV', r: '0xR', s: '0xS' } }, { status: true })).resolves.toStrictEqual(
+    { success: true })
 })

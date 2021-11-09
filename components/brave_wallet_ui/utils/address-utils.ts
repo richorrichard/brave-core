@@ -20,10 +20,5 @@ export function isValidAddress (value: string, length: number): boolean {
 }
 
 export function isHardwareAccount (accounts: WalletAccountType[], address: string) {
-  for (const account of accounts) {
-    if (account.deviceId && account.address === address) {
-      return true
-    }
-  }
-  return false
+  return accounts.some(account => account.deviceId && account.address === address)
 }
