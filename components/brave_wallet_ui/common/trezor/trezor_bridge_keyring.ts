@@ -6,7 +6,6 @@
 
 const { EventEmitter } = require('events')
 import { publicToAddress, toChecksumAddress, bufferToHex } from 'ethereumjs-util'
-import { Transaction } from 'ethereumjs-tx'
 import {
   TrezorDerivationPaths, TrezorBridgeAccountsPayload
 } from '../../components/desktop/popup-modals/add-account-modal/hardware-wallet-connect/types'
@@ -121,30 +120,17 @@ export default class TrezorBridgeKeyring extends EventEmitter {
     return ''
   }
 
-  private normalize (buf: any) {
-    return bufferToHex(buf).toString()
-  }
-
   private prepareTransactionPayload = (path: string, txInfo: TransactionInfo, chainId: string): SignTransactionCommandPayload => {
-    const txParams = {
-      nonce: txInfo.txData.baseData.nonce,
-      gasPrice: txInfo.txData.baseData.gasPrice,
-      gasLimit: txInfo.txData.baseData.gasLimit,
-      to: txInfo.txData.baseData.to,
-      value: txInfo.txData.baseData.value,
-      data: Buffer.from(txInfo.txData.baseData.data)
-    }
-    const tx = new Transaction(txParams)
     return {
       path: path,
       transaction: {
-        to: this.normalize(tx.to),
-        value: this.normalize(tx.value),
-        data: this.normalize(tx.data).replace('0x', ''),
+        to: txInfo.txData.baseData.to,
+        value: txInfo.txData.baseData.value,
+        data: bufferToHex(Buffer.from(txInfo.txData.baseData.data)).toString(),
         chainId: parseInt(chainId, 16),
-        nonce: this.normalize(tx.nonce),
-        gasLimit: this.normalize(tx.gasLimit),
-        gasPrice: this.normalize(tx.gasPrice)
+        nonce: txInfo.txData.baseData.nonce,
+        gasLimit: txInfo.txData.baseData.gasLimit,
+        gasPrice: txInfo.txData.baseData.gasPrice
       }
     }
   }
