@@ -98,9 +98,9 @@ class EthTxController : public KeyedService,
       const std::string& tx_meta_id,
       const std::vector<uint8_t>& data,
       SetDataForUnapprovedTransactionCallback callback) override;
-  void ApproveHardwareTransaction(
+  void GetNonceForHardwareTransaction(
       const std::string& tx_meta_id,
-      ApproveHardwareTransactionCallback callback) override;
+      GetNonceForHardwareTransactionCallback callback) override;
   void SpeedupOrCancelTransaction(
       const std::string& tx_meta_id,
       bool cancel,
@@ -113,8 +113,6 @@ class EthTxController : public KeyedService,
       const std::string& r,
       const std::string& s,
       ProcessHardwareSignatureCallback callback) override;
-  void GetTransactionInfo(const std::string& tx_meta_id,
-                          GetTransactionInfoCallback callback) override;
   void GetTransactionMessageToSign(
       const std::string& tx_meta_id,
       GetTransactionMessageToSignCallback callback) override;
@@ -141,7 +139,7 @@ class EthTxController : public KeyedService,
                       uint256_t nonce);
   void OnGetNextNonceForHardware(
       std::unique_ptr<EthTxStateManager::TxMeta> meta,
-      ApproveHardwareTransactionCallback callback,
+      GetNonceForHardwareTransactionCallback callback,
       bool success,
       uint256_t nonce);
   void PublishTransaction(const std::string& tx_meta_id,

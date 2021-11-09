@@ -190,6 +190,9 @@ std::string EthTransaction::GetSignedTransaction() const {
 bool EthTransaction::ProcessVRS(const std::string& v,
                                 const std::string& r,
                                 const std::string& s) {
+  if (!base::StartsWith(v, "0x") || !base::StartsWith(r, "0x") ||
+      !base::StartsWith(s, "0x"))
+    return false;
   uint256_t v_decoded;
   if (!HexValueToUint256(v, &v_decoded)) {
     LOG(ERROR) << "Unable to decode v param";

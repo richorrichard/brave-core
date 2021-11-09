@@ -293,15 +293,11 @@ export function refreshSitePermissions () {
 
 export async function signTrezorTransaction (apiProxy: APIProxyControllers, path: string, txInfo: TransactionInfo): Promise<SignHardwareTransactionType> {
   const chainId = await apiProxy.ethJsonRpcController.getChainId()
-  const approved = await apiProxy.ethTxController.approveHardwareTransaction(txInfo.id)
-  if (!approved.success) {
+  const nonce = await apiProxy.ethTxController.getNonceForHardwareTransaction(txInfo.id)
+  if (!nonce.nonce) {
     return { success: false, error: getLocale('braveWalletApproveTransactionError') }
   }
-  const transaction = await apiProxy.ethTxController.getTransactionInfo(txInfo.id)
-  if (!transaction) {
-    return { success: false, error: getLocale('braveWalletTransactionNotFoundSignError') }
-  }
-  txInfo.txData.baseData.nonce = transaction.info.txData.baseData.nonce
+  txInfo.txData.baseData.nonce = nonce.nonce
   const deviceKeyring = await apiProxy.getKeyringsByType(kTrezorHardwareVendor)
   const signed = await deviceKeyring.signTransaction(path, txInfo, chainId.chainId)
   if (!signed || !signed.success) {
@@ -317,8 +313,8 @@ export async function signTrezorTransaction (apiProxy: APIProxyControllers, path
 }
 
 export async function signLedgerTransaction (apiProxy: APIProxyControllers, path: string, txInfo: TransactionInfo): Promise<SignHardwareTransactionType> {
-  const approved = await apiProxy.ethTxController.approveHardwareTransaction(txInfo.id)
-  if (!approved.success) {
+  const nonce = await apiProxy.ethTxController.getNonceForHardwareTransaction(txInfo.id)
+  if (!nonce.nonce) {
     return { success: false, error: getLocale('braveWalletApproveTransactionError') }
   }
   const data = await apiProxy.ethTxController.getTransactionMessageToSign(txInfo.id)

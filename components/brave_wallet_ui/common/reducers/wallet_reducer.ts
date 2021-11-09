@@ -39,7 +39,6 @@ import * as WalletActions from '../actions/wallet_actions'
 import { formatFiatBalance } from '../../utils/format-balances'
 import { sortTransactionByDate } from '../../utils/tx-utils'
 
-import { isHardwareAccount } from '../../utils/address-utils'
 const defaultState: WalletState = {
   hasInitialized: false,
   isWalletCreated: false,
@@ -301,10 +300,6 @@ reducer.on(WalletActions.unapprovedTxUpdated, (state: any, payload: UnapprovedTx
 })
 
 reducer.on(WalletActions.transactionStatusChanged, (state: WalletState, payload: TransactionStatusChanged) => {
-  if (isHardwareAccount(state.accounts, payload.txInfo.fromAddress)) {
-    return state
-  }
-
   const newPendingTransactions = state.pendingTransactions
     .filter((tx: TransactionInfo) => tx.id !== payload.txInfo.id)
     .concat(payload.txInfo.txStatus === TransactionStatus.Unapproved ? [payload.txInfo] : [])

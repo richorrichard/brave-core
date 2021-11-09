@@ -340,8 +340,7 @@ handler.on(WalletActions.transactionStatusChanged.getType(), async (store: Store
     [TransactionStatus.Submitted, TransactionStatus.Rejected, TransactionStatus.Approved]
       .includes(payload.txInfo.txStatus)
   ) {
-    const hardware = await findHardwareAccountInfo(payload.txInfo.fromAddress)
-    if (!hardware && state.selectedPanel === 'approveTransaction' && walletState.pendingTransactions.length === 0) {
+    if (state.selectedPanel === 'approveTransaction' && walletState.pendingTransactions.length === 0) {
       const apiProxy = await getAPIProxy()
       apiProxy.closeUI()
     }

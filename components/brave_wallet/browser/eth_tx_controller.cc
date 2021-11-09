@@ -360,14 +360,14 @@ void EthTxController::OnGetGasOracle(
   }
 }
 
-void EthTxController::ApproveHardwareTransaction(
+void EthTxController::GetNonceForHardwareTransaction(
     const std::string& tx_meta_id,
-    ApproveHardwareTransactionCallback callback) {
+    GetNonceForHardwareTransactionCallback callback) {
   std::unique_ptr<EthTxStateManager::TxMeta> meta =
       tx_state_manager_->GetTx(tx_meta_id);
   if (!meta) {
     LOG(ERROR) << "No transaction found";
-    std::move(callback).Run(false);
+    std::move(callback).Run("");
     return;
   }
   if (!meta->tx->nonce()) {
@@ -403,35 +403,21 @@ void EthTxController::GetTransactionMessageToSign(
   std::move(callback).Run(encoded);
 }
 
-void EthTxController::GetTransactionInfo(const std::string& tx_meta_id,
-                                         GetTransactionInfoCallback callback) {
-  std::unique_ptr<EthTxStateManager::TxMeta> meta =
-      tx_state_manager_->GetTx(tx_meta_id);
-  if (!meta) {
-    LOG(ERROR) << "No transaction found";
-    std::move(callback).Run(nullptr);
-    return;
-  }
-
-  std::move(callback).Run(EthTxStateManager::TxMetaToTransactionInfo(*meta));
-}
-
 void EthTxController::OnGetNextNonceForHardware(
     std::unique_ptr<EthTxStateManager::TxMeta> meta,
-    ApproveHardwareTransactionCallback callback,
+    GetNonceForHardwareTransactionCallback callback,
     bool success,
     uint256_t nonce) {
   if (!success) {
     meta->status = mojom::TransactionStatus::Error;
     tx_state_manager_->AddOrUpdateTx(*meta);
     LOG(ERROR) << "GetNextNonce failed";
-    std::move(callback).Run(false);
+    std::move(callback).Run("");
     return;
   }
   meta->tx->set_nonce(nonce);
-  meta->status = mojom::TransactionStatus::Approved;
   tx_state_manager_->AddOrUpdateTx(*meta);
-  std::move(callback).Run(true);
+  std::move(callback).Run(Uint256ValueToHex(nonce));
 }
 
 void EthTxController::ProcessHardwareSignature(
@@ -454,6 +440,8 @@ void EthTxController::ProcessHardwareSignature(
     std::move(callback).Run(false);
     return;
   }
+  meta->status = mojom::TransactionStatus::Approved;
+  tx_state_manager_->AddOrUpdateTx(*meta);
   auto data = meta->tx->GetSignedTransaction();
   PublishTransaction(tx_meta_id, data);
   std::move(callback).Run(true);

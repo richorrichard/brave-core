@@ -595,9 +595,8 @@ export interface ProcessHardwareSignatureReturnInfo {
   status: boolean
 }
 
-export interface ApproveHardwareTransactionReturnInfo {
-  success: boolean
-  message: string
+export interface GetNonceForHardwareTransactionReturnInfo {
+  nonce: string
 }
 
 export interface RejectTransactionReturnInfo {
@@ -671,10 +670,9 @@ export interface EthTxController {
   makeERC20ApproveData: (spenderAddress: string, amount: string) => Promise<MakeERC20ApproveDataReturnInfo>
   makeERC721TransferFromData: (from: string, to: string, tokenId: string, contractAddress: string) => Promise<MakeERC721TransferFromDataReturnInfo>
   getAllTransactionInfo: (fromAddress: string) => Promise<GetAllTransactionInfoReturnInfo>
-  approveHardwareTransaction: (txMetaId: string) => Promise<ApproveHardwareTransactionReturnInfo>
+  getNonceForHardwareTransaction: (txMetaId: string) => Promise<GetNonceForHardwareTransactionReturnInfo>
   speedupOrCancelTransaction: (txMetaId: string, cancel: boolean) => Promise<SpeedupRetryCancelTransactionReturnInfo>
   retryTransaction: (txMetaId: string) => Promise<SpeedupRetryCancelTransactionReturnInfo>
-  getTransactionInfo: (txMetaId: string) => Promise<GetTransactionInfoReturnInfo>
   getTransactionMessageToSign: (txMetaId: string) => Promise<GetTransactionMessageToSignReturnInfo>
   processHardwareSignature: (txMetaId: string, v: string, r: string, s: string) => Promise<ProcessHardwareSignatureReturnInfo>
 }
